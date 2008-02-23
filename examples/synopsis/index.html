@@ -1,0 +1,54 @@
+<head>
+
+<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
+<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
+
+<script type="text/javascript">
+
+function sayHello() {
+	var caller = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","channel1");
+	caller.call("hello", "Hello World")
+}
+
+function $(id) {
+	return document.getElementById(id)
+}
+
+</script>
+
+</head>
+
+<body>
+<h1>xssinterface Demo</h1>
+
+<p>Click a send-Button</p>
+
+<form>
+
+<table border="1">
+  <tr>
+    <td width="97">My Domain</td>
+    <td width="287">
+      <script type="text/javascript">
+      document.write(document.location.hostname)
+	  </script>
+    </td>
+  </tr>
+  <tr>
+    <td width="97">Input</td>
+    <td width="287">
+     <input type="button" value="send" onclick="sayHello()" />
+  </tr>
+  <tr>
+    <td>IFrame</td>
+    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/synopsis/iframe.html" width="500" height=200 id="iframe" name="iframe"></iframe></td>
+  </tr>
+</table>
+
+<div id="setter"></div>
+<div id="log"</div>
+
+</form>
+
+</body>
+</html>
