@@ -1,0 +1,5 @@
+#summary Discusses security concepts and concerns of this library
+
+= Warning =
+
+This library might contain severe security holes. Peer review is very welcome!
