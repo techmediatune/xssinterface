@@ -25,9 +25,11 @@ window.xssListener.registerCallback("hello", function (msg) { $('output').value 
 window.xssListener.startEventLoop()
 }}}
 
+[http://it.test.avantaxx.de/xssinterface/examples/basic/ Example]
+
 = How it works? =
 
-All sites that participate in the cross domain calls mus provide an html file that is provided by this library that enables other domains to place certain cookie under the domain of the site.
+All sites that participate in the cross domain calls must provide an html file that is provided by this library that enables other domains to place certain cookie under the domain of the site.
 
 The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
 
