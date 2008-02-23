@@ -19,7 +19,7 @@ XSSInterface.Listener  = function (securityToken,channelId) {
 		this.channelId = ""
 	}
 	
-	this.cookie        = new XSSInterface.Cookie(XSSInterfaceCookieName)
+	this.cookie        = new XSSInterface.Cookie()
 }
 
 XSSInterface.Listener.prototype = {
@@ -142,7 +142,8 @@ XSSInterface.Caller.prototype = {
 	},
 
 	serialize: function (data) {
-    	return JSON.stringify(data);
+    	var str = JSON.stringify(data);
+    	return str
     },
 	
 	securityTokenToTargetDomain: function () {
@@ -154,7 +155,8 @@ XSSInterface.Caller.prototype = {
 		
 		var args = [];
 		for(var i = 1; i < arguments.length; i++) { // copy arguments, leave out first, because it is the function name
-			args[i] = arguments[i];
+			XSSdebug("Arg: "+arguments[i])
+			args.push(arguments[i]);
 		}
 		
 		var data = {
@@ -163,6 +165,8 @@ XSSInterface.Caller.prototype = {
 			from:  document.location.hostname,
 			token: this.securityTokenToTargetDomain()
 		};
+		
+		
 		this.save(data)
 	}
 
@@ -219,6 +223,11 @@ XSSInterface.Cookie.prototype = {
 
     	this.doc.cookie = cookie; 
         
+        var newval = this.get(name)
+        if(newval != value) {
+        	XSSdebug("Failed Setting cookie " +name+" "+value+"->"+newval)
+        }
+        
 	},
 	
 	
@@ -230,11 +239,11 @@ XSSInterface.Cookie.prototype = {
 		
 		var html = '<iframe src="'+src+'" width=1 height=1 frameborder="0" border="0"></iframe>'
 		
-		if(!this.iframeContainer) {
+		//if(!this.iframeContainer) {
 			var span   = this.doc.createElement("span");
 			this.doc.body.appendChild(span);
 			this.iframeContainer = span
-		}
+		//}
 		
 		this.iframeContainer.innerHTML = html
 	}

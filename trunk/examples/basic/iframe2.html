@@ -15,7 +15,7 @@ function $(id) {
 }
 
 function bind() {
-        window.xssListener = new XSSInterface.Listener("1234567890","iframe1");
+        window.xssListener = new XSSInterface.Listener("1234567890","iframe2");
         window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
 
         window.xssListener.registerCallback("hello", function (msg,bgcolor,stuff) { $('output').value = msg;document.body.style.backgroundColor=bgcolor ;} )
@@ -34,7 +34,7 @@ function sayHello() {
 </head>
 
 <body onload="bind()">
-<h1>I am IFrame Number 1</h1>
+<h1>I am IFrame Number 2</h1>
 <form>
 <table border="1">
   <tr>
