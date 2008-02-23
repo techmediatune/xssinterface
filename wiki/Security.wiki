@@ -3,3 +3,7 @@
 = Warning =
 
 This library might contain severe security holes. Peer review is very welcome!
+
+= Cross Domain Communication =
+
+Sending messages works through setting a cookie under the destination domain. The listener only accepts messages that contain a certain security token. Callers receive the token through a cookie that the listener places under the caller domain.
