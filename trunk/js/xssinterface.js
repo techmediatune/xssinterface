@@ -1,12 +1,58 @@
+/*
+ * 
+ * 
+ * The xssinterface javascript library enables communication of 
+ * multiple pages (or pages and iframes) via javascript functions 
+ * across domain boundaries. This may be useful for websites that 
+ * want to expose a limited javascript interface to embedded widgets.
+ * 
+ * 
+ * Copyright (c) 2008, Malte Ubl
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the name of Malte Ubl nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ */
 
+
+// Number of milli seconds between polls for new callbacks
 var XSSInterfacePollIntervalMilliSeconds = 300;
+// Name of cookie that is used for messages. Should not be changed
 var XSSInterfaceCookieName               = "XSSData";
+// Name of cookie that is used for the security token
 var XSSInterfaceSecurityTokenCookieName  = "XSSSecurityToken";
+// Enables debug mode. You might want to add <div id=log></div> to your pages
 var XSSInterfaceDebug                    = false;
 
 
 XSSInterface = {};
 
+/* A listener for cross domain callbacks
+ * 
+ * securityToken should be a cryptographically secure random string. It should be equal for all listener of
+ * a users and a given domain. sha1(session_id) should work. This id is exchanged with sites that are allowed to
+ * call this listener.
+ * 
+ * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
+*/
 XSSInterface.Listener  = function (securityToken,channelId) {
 	this.callbacks     = {};
 	this.callbackNames = [];
@@ -23,6 +69,42 @@ XSSInterface.Listener  = function (securityToken,channelId) {
 }
 
 XSSInterface.Listener.prototype = {
+	
+	/*
+	 * call this to enable hostname to send messages to this listener
+	 * pathToCookieSetterHTMLFile must be a path residing on hostname to the cookie_setter.html file that is provided by this library
+	 *  "http://" + hostname + pathToCookieSetterHTMLFile
+	 * 
+	 */
+	allowDomain: function(hostname, pathToCookieSetterHTMLFile) {
+		var me = this;
+		// the timeout makes Firefox happy
+		
+		var url = "http://"+hostname+pathToCookieSetterHTMLFile
+		
+		window.setTimeout(function () {
+			me.cookie.setCrossDomain(url, "token", me.securityToken, me.channelId)
+		}, 1);
+	},
+
+	/*
+	 * register a callback with a given name
+	 * func must be a function reference
+	 */
+	registerCallback: function (name, func) {
+		this.callbacks[name] = func;
+		this.callbackNames.push(name)
+	},
+	
+	/*
+	 * As soon as this method is called the listener will respond to calls
+	 */
+	startEventLoop: function () {
+		var me = this;
+		window.setInterval( function () { me.execute() }, XSSInterfacePollIntervalMilliSeconds )
+	},	
+	
+	// private
 	parse: function () {
 
 		var json   = this.read();	
@@ -38,37 +120,22 @@ XSSInterface.Listener.prototype = {
 
 	},
 	
+	// private
 	dataCookieName:	function () {
 		return XSSInterfaceCookieName+this.channelId
 	},
-
+	
+	// private
 	read: function() {
 		return this.cookie.get(this.dataCookieName());
 	},
 
+	// private
 	clear: function() {
 		this.cookie.set(this.dataCookieName(),"");
 	},
 
-	
-	allowDomain: function(hostname, pathToCookieSetterHTMLFile) {
-		var me = this;
-		// the timeout makes Firefox happy
-		
-		var url = "http://"+hostname+pathToCookieSetterHTMLFile
-		
-		window.setTimeout(function () {
-			me.cookie.setCrossDomain(url, "token", me.securityToken, me.channelId)
-		}, 1);
-	},
-
-
-	registerCallback: function (name, func) {
-		this.callbacks[name] = func;
-		this.callbackNames.push(name)
-	},
-
-
+	// private
 	execute: function () {
 		var data = this.parse();
 
@@ -111,18 +178,22 @@ XSSInterface.Listener.prototype = {
 			func.apply(call_info, paras)
 		}
 
-	},
-
-	startEventLoop: function () {
-		var me = this;
-		window.setInterval( function () { me.execute() }, XSSInterfacePollIntervalMilliSeconds )
-	}	
+	}
 };
 
-
-XSSInterface.Caller = function (targetDomain,cookieSetterHTMLFile,channelId) {
+/*
+ * Class for performing cross domain javascript function calls.
+ * 
+ * targetDomain is the hostname to which call should be send.
+ * 
+ * pathToCookieSetterHTMLFile must be a path residing on targetDomain to the cookie_setter.html file that is provided by this library
+ *  "http://" + targetDomain + pathToCookieSetterHTMLFile
+ * 
+ * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
+ */
+XSSInterface.Caller = function (targetDomain,pathToCookieSetterHTMLFile,channelId) {
 	this.domain                     = targetDomain;
-	this.pathToCookieSetterHTMLFile = cookieSetterHTMLFile
+	this.pathToCookieSetterHTMLFile = pathToCookieSetterHTMLFile
 	
 	this.cookie                     = new XSSInterface.Cookie(XSSInterfaceCookieName)
 	
@@ -133,24 +204,11 @@ XSSInterface.Caller = function (targetDomain,cookieSetterHTMLFile,channelId) {
 }
 
 XSSInterface.Caller.prototype = {
-
-    save: function(data) {
-    	
-    	var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
-    	
-		this.cookie.setCrossDomain(url, "data", this.serialize(data), this.channelId)
-	},
-
-	serialize: function (data) {
-    	var str = JSON.stringify(data);
-    	return str
-    },
 	
-	securityTokenToTargetDomain: function () {
-		var name = XSSInterfaceSecurityTokenCookieName+this.domain
-		return this.cookie.get(name)
-	},
-
+	/*
+	 * Call a method called name on the target domain.
+	 * All extra parameters to will be forwarded to the remote method.
+	 */
 	call: function (name) {
 		
 		var args = [];
@@ -168,6 +226,26 @@ XSSInterface.Caller.prototype = {
 		
 		
 		this.save(data)
+	},
+
+	// private
+    save: function(data) {
+    	
+    	var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
+    	
+		this.cookie.setCrossDomain(url, "data", this.serialize(data), this.channelId)
+	},
+
+	// private
+	serialize: function (data) {
+    	var str = JSON.stringify(data);
+    	return str
+    },
+	
+	// private
+	securityTokenToTargetDomain: function () {
+		var name = XSSInterfaceSecurityTokenCookieName+this.domain
+		return this.cookie.get(name)
 	}
 
 };
@@ -250,6 +328,11 @@ XSSInterface.Cookie.prototype = {
 
 }
 
+
+/*
+ * Used in cookie_setter.html to set a cookie based on parameters given to the file via the query_string
+ * For security reasons the caller cannot determine the cookie name
+ */
 XSSInterface.Cookie.setFromLocation = function () {
 
 	var search = window.location.search;

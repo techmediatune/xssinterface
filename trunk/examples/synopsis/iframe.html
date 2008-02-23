@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Inner</title>
+
+<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
+<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
+
+
+<script type="text/javascript">
+
+function $(id) {
+        return document.getElementById(id)
+}
+
+function bind() {
+        window.xssListener = new XSSInterface.Listener("1234567890","channel1");
+        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+
+        window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
+
+        window.xssListener.startEventLoop()
+}
+
+function sayHello() {
+        window.xssCaller.call("hello", $('input').value)
+}
+
+
+
+</script>
+
+</head>
+
+<body onload="bind()">
+<h1>I am an IFrame</h1>
+<form>
+<table border="1">
+  <tr>
+    <td width="97">My Domain</td>
+    <td width="287">
+	<script type="text/javascript">
+	document.write(document.location.hostname)
+	</script>
+	</td>
+  </tr>
+  <tr>
+    <td>Output</td>
+    <td><input type="text" name="output" id="output" /></td>
+  </tr>
+</table>
+
+<div id="setter"></div>
+<div id="log"></div>
+</form>
+
+</body>
+</html>
