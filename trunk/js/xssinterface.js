@@ -6,6 +6,9 @@
  * across domain boundaries. This may be useful for websites that 
  * want to expose a limited javascript interface to embedded widgets.
  * 
+ * This library requires that you also load the standard JSON library:
+ * http://www.json.org/json2.js
+ * 
  * 
  * Copyright (c) 2008, Malte Ubl
  *
@@ -84,7 +87,7 @@ XSSInterface.Listener.prototype = {
 		
 		window.setTimeout(function () {
 			me.cookie.setCrossDomain(url, "token", me.securityToken, me.channelId)
-		}, 1);
+		}, 300);
 	},
 
 	/*
@@ -105,6 +108,9 @@ XSSInterface.Listener.prototype = {
 	},	
 	
 	// private
+	/*
+	 * Reads a message cookie. If successful, clears the cookie and parses its contents as JSON
+	 */
 	parse: function () {
 
 		var json   = this.read();	
@@ -121,21 +127,35 @@ XSSInterface.Listener.prototype = {
 	},
 	
 	// private
+	/*
+	 * Build the message cookie name. It includes the channelId so that we can have multiple message channels.
+	 */
 	dataCookieName:	function () {
 		return XSSInterfaceCookieName+this.channelId
 	},
 	
 	// private
+	/*
+	 * Retrieves a message cookie
+	 */
 	read: function() {
 		return this.cookie.get(this.dataCookieName());
 	},
 
 	// private
+	/*
+	 * Clears the message cookie
+	 */
 	clear: function() {
 		this.cookie.set(this.dataCookieName(),"");
 	},
 
 	// private
+	/*
+	 * Checks whether there is a new message. If true locates the callback and executes it.
+	 * Throws an error if the security token provided by the message is wrong or if
+	 * the callback name is unknown.
+	 */
 	execute: function () {
 		var data = this.parse();
 
@@ -229,6 +249,9 @@ XSSInterface.Caller.prototype = {
 	},
 
 	// private
+	/*
+	 * Save a message cookie under the dall target domain
+	 */
     save: function(data) {
     	
     	var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
@@ -237,12 +260,18 @@ XSSInterface.Caller.prototype = {
 	},
 
 	// private
+	/*
+	 * Turn the message data into JSON
+	 */
 	serialize: function (data) {
     	var str = JSON.stringify(data);
     	return str
     },
 	
 	// private
+	/*
+	 * Retrieves the security token that grants access to the call target domain
+	 */
 	securityTokenToTargetDomain: function () {
 		var name = XSSInterfaceSecurityTokenCookieName+this.domain
 		return this.cookie.get(name)
@@ -251,6 +280,9 @@ XSSInterface.Caller.prototype = {
 };
 
 
+/*
+ * Cookie handling routines
+ */
 XSSInterface.Cookie = function () {
 	this.doc  = document;
 };
@@ -258,7 +290,9 @@ XSSInterface.Cookie = function () {
 
 XSSInterface.Cookie.prototype = {
 
-
+	/*
+	 * Retrieve a cookie called $name
+	 */
 	// Extremely ugly code that seems to work follows. a more robust replacement is more that welcome
 	get:	function (name) {
 		
@@ -288,7 +322,11 @@ XSSInterface.Cookie.prototype = {
 
         return value;
 	},
-
+	
+	/*
+	 * Set a cookie with name and value
+	 * expires must be a Date-Object
+	 */
 	set:	function(name, value, expires, secure) {
 
 		XSSdebug("Setting cookie "+name+"="+value)
@@ -308,7 +346,12 @@ XSSInterface.Cookie.prototype = {
         
 	},
 	
-	
+	/*
+	 * Set a cookie in a different domain
+	 * The cookie will be readable by domain of url
+	 * url must point to a cookie_setter.html file that is provided by this library.
+	 * The parameters that are appended to the url will be picked up by XSSInterface.Cookie.setFromLocation()
+	 */
 	setCrossDomain: function (url, key, value,channelId) { // key may have the values data or token
 	
 		var from = this.doc.location.hostname;
@@ -372,7 +415,10 @@ XSSInterface.Cookie.setFromLocation = function () {
 
 	
 }
-
+/*
+ * Print debug information if in debug mode.
+ * if document.getElementById("log") returns something, the output will be send there.
+ */
 XSSdebug = function (txt) {
 	
 	if(!XSSInterfaceDebug) return;
