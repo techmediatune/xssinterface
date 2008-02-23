@@ -43,6 +43,7 @@ http://www.one.com hosts an iframe located at
 http://www.two.com 
 
 The following URL return the file cookie_setter.html from this library:
+
 * http://www.one.com/cookie_setter.html
 * http://www.and.com/cookie_setter.html
 
@@ -61,11 +62,22 @@ function sayHello() {
 
 == Listener Side ==
 
+We register an onload-handler that creates a cross domain message listener:
+
 {{{
-	window.onload = function () {
+window.onload = function () {
 	window.xssListener = new XSSInterface.Listener("1234567890","channel1");
-	window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+	window.xssListener.allowDomain("www.one.com", "/cookie_setter.html");
 
 	window.xssListener.registerCallback("hello", function (msg) {alert(msg)} )
 window.xssListener.startEventLoop()
 }
+}}}
+
+The listener defined a security token (123456789). This should be a cryptographically secure hash such as a hash of the users session id. Do not use the user session id. The token will be communicated to other domains. The parameter "channel1" tells the listener to respond only to messages on channel1.
+
+The call to allowDomain() allows www.one.com to call methods on this listener. The second paramter tells the listeners where is find the cookie_setter.html on www.one.com.
+
+registerCallback() registers a callback called "hello" that shows an alert box with its parameter when called.
+
+And finally startEventLoop() tells the listener to start listening for calls.
