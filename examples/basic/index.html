@@ -2,30 +2,31 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Outer</title>
+<title>xssinterface Demo</title>
 
-<script type="text/javascript" src="/js/json2.js"></script>
-<script type="text/javascript" src="/js/xssinterface.js"></script>
+<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
+<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
 
 
 <script type="text/javascript">
 
-function $(id) {
-        return document.getElementById(id)
-}
 
 function bind() {
-
-        window.xssCaller = new XSSInterface.Caller("it2.test.avantaxx.de","/iframe/cookie_setter.html","abc");
+	window.xssCaller1 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe1");
+	window.xssCaller2 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe2");
 }
 
-function sayHello() {
-        window.xssCaller.call("hello", $('input').value, $('color').value, {
-  para1: ["1",2,3,{}],
-  para2: {}
-})
+function sayHello(which) {
+
+	var message = $('input').value;
+	var color   = $('color').options[$('color').selectedIndex].value;
+
+	window["xssCaller"+which].call("hello", message, color)
 }
 
+function $(id) {
+	return document.getElementById(id)
+}
 
 
 </script>
@@ -33,12 +34,15 @@ function sayHello() {
 </head>
 
 <body onload="bind(); ">
+<h1>xssinterface Demo</h1>
+
+<p>Click a send-Button</p>
 
 <form>
 
 <table border="1">
   <tr>
-    <td width="97">Domain</td>
+    <td width="97">My Domain</td>
     <td width="287">
       <script type="text/javascript">
       document.write(document.location.hostname)
@@ -49,16 +53,24 @@ function sayHello() {
     <td width="97">Input</td>
     <td width="287">
      Text: <input type="text" name="input" id="input" value="Hello World" /><br />
-     Color: <input type="text" name="color" id="color" value="red" /><br />
-     <input type="button" value="send" onclick="sayHello()" /></td>
+     Color:
+     <select id="color">
+       <option value="red">red</option>
+       <option value="yellow">yellow</option>
+       <option value="blue">blue</option>
+       <option value="green">green</option>
+     </select> 
+		<br />
+     <input type="button" value="send to 1" onclick="sayHello(1)" />
+     <input type="button" value="send to 2" onclick="sayHello(2)" /></td>
   </tr>
   <tr>
-    <td>Output</td>
-    <td><input type="text" name="output" id="output" /></td>
+    <td>IFrame 1</td>
+    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe.html" width="500" height=200 id="iframe" name="iframe"></iframe></td>
   </tr>
   <tr>
-    <td>IFrame</td>
-    <td><iframe src="http://it2.test.avantaxx.de/iframe/iframe.html" width="500" height=200 id="iframe" name="iframe"></iframe></td>
+    <td>IFrame 2</td>
+    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
   </tr>
 </table>
 
