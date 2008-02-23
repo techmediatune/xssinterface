@@ -34,3 +34,38 @@ All sites that participate in the cross domain calls must provide an html file t
 The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
 
 Pages must explicitly grant access to their domain by setting a security token cookie under a domain that is allowed to access the callbacks.
+
+= Usage =
+
+Lets assume the following:
+
+http://www.one.com hosts an iframe located at
+http://www.two.com 
+
+The following URL return the file cookie_setter.html from this library:
+* http://www.one.com/cookie_setter.html
+* http://www.and.com/cookie_setter.html
+
+You might need to edit the file cookie_setter.html to integrate the correct javascript file locations.
+
+== Caller Side ==
+
+The following function call the message hello with the parameter "Hello World" on the domain www.two.com:
+
+{{{
+function sayHello() {
+	var caller = new XSSInterface.Caller("www.two.com","/cookie_setter.html","channel1");
+	caller.call("hello", "Hello World")
+}
+}}}
+
+== Listener Side ==
+
+{{{
+	window.onload = function () {
+	window.xssListener = new XSSInterface.Listener("1234567890","channel1");
+	window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+
+	window.xssListener.registerCallback("hello", function (msg) {alert(msg)} )
+window.xssListener.startEventLoop()
+}
