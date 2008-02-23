@@ -1,5 +1,9 @@
 #summary Documentation for xssinterface
 
+= Introduction =
+
+xssinterface enables websites to expose a certain sets of javascript callback methods to pages residing on different domains. The site specifies which methods may be called as well as which domains are allowed to call the methods.
+
 = Synopsis =
 
 Place this on the containing page:
@@ -20,3 +24,5 @@ window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie
 window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
 window.xssListener.startEventLoop()
 }}}
+
+= How it works? =
