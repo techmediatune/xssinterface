@@ -100,7 +100,8 @@ XSSInterface.Listener.prototype = {
 	},
 	
 	/*
-	 * As soon as this method is called the listener will respond to calls
+	 * As soon as this method is called the listener will respond to calls.
+	 * This should be called from the window.onload event
 	 */
 	startEventLoop: function () {
 		var me = this;
