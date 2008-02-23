@@ -26,3 +26,9 @@ window.xssListener.startEventLoop()
 }}}
 
 = How it works? =
+
+All sites that participate in the cross domain calls mus provide an html file that is provided by this library that enables other domains to place certain cookie under the domain of the site.
+
+The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
+
+Pages must explicitly grant access to their domain by setting a security token cookie under a domain that is allowed to access the callbacks.
