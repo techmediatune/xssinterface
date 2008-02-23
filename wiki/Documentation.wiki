@@ -1,3 +1,10 @@
 #summary Documentation for xssinterface
 
 = Synopsis =
+
+{{{
+function sayHello() {
+	var caller = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","channel1");
+	caller.call("hello", "Hello World")
+}
+}}}
