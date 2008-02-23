@@ -15,9 +15,8 @@ Place this in the widget or iframe:
 
 {{{
 window.xssListener = new XSSInterface.Listener("1234567890","channel1");
-        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
 
-        window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
-
-        window.xssListener.startEventLoop()
+window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
+window.xssListener.startEventLoop()
 }}}
