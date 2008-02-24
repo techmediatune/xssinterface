@@ -33,6 +33,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  * 
+ * TODO
+ * - Factor out cookie/postMessage messaging backends into individual classes^
+ * - Turns documentation into nice JSDoc
+ * 
  */
 
 
@@ -50,11 +54,10 @@ XSSInterface = {};
 
 /* A listener for cross domain callbacks
  * 
- * securityToken should be a cryptographically secure random string. It should be equal for all listener of
- * a users and a given domain. sha1(session_id) should work. This id is exchanged with sites that are allowed to
- * call this listener.
- * 
- * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
+ * @param securityToken should be a cryptographically secure random string. It should be equal for all listener of
+ *  a users and a given domain. sha1(session_id) should work. This id is exchanged with sites that are allowed to
+ *  call this listener.
+ * @param channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
 */
 XSSInterface.Listener   = function (securityToken,channelId) {
 	this.callbacks      = {};
@@ -77,7 +80,8 @@ XSSInterface.Listener.prototype = {
 	
 	/*
 	 * call this to enable hostname to send messages to this listener
-	 * pathToCookieSetterHTMLFile must be a path residing on hostname to the cookie_setter.html file that is provided by this library
+	 * @param hostname that may send messages
+	 * @param pathToCookieSetterHTMLFile must be a path residing on hostname to the cookie_setter.html file that is provided by this library
 	 *  "http://" + hostname + pathToCookieSetterHTMLFile
 	 * 
 	 */
@@ -197,37 +201,21 @@ XSSInterface.Listener.prototype = {
 
 	// private
 	/*
-	 * Checks whether there is a new message. If true locates the callback and executes it.
+	 * Executes a method.
 	 * Throws an error if the security token provided by the message is wrong or if
 	 * the callback name is unknown.
+	 * Throws an error if the method name is unknown.
 	 */
 	execute: function (data, viaPostMessage) {
 		if(data == null) {
 			return
 		}
 		
+		this.authorizeCall(data, viaPostMessage);
+		
 		var name  = data.name;
 		var paras = data.paras;
 		var from  = data.from;
-		
-		if(viaPostMessage) {
-			var found = false
-			for(var i = 0; i < this.allowedDomains.length; i++) {
-				if(this.allowedDomains[i] == from) {
-					found = true;
-					break
-				}
-			}
-			if(!found) {
-				throw("Message from "+from+" blocked")
-			}
-		} else {
- 			if(data.token != this.securityToken) {
-				throw("Received wrong security token. Expected: "+this.securityToken+" Received: "+data.token)
-			}
-		}
-
-		
 		
 		// check whether $name is really a registered function and not something that leaked into this.callbacks through prototype extension
 		var found = false;
@@ -252,9 +240,36 @@ XSSInterface.Listener.prototype = {
 		};
 
 		if(func != null) {
+			// call the method. The methods receives the trasmitted paras as regular parameters
+			// the method's this variable contains the call_info object
 			func.apply(call_info, paras)
 		}
 
+	},
+	// private
+	/*
+	 * checks whether this call is authorized
+	 * Throws an error if the security token provided by the message is wrong or if
+	 * the callback name is unknown.
+	 */
+	authorizeCall: function (data, viaPostMessage) {
+		if(viaPostMessage) {
+			var found = false
+			for(var i = 0; i < this.allowedDomains.length; i++) {
+				if(this.allowedDomains[i] == data.from) {
+					found = true;
+					break
+				}
+			}
+			if(!found) {
+				throw("Message from "+data.from+" blocked")
+			}
+		} else {
+ 			if(data.token != this.securityToken) {
+				throw("Received wrong security token. Expected: "+this.securityToken+" Received: "+data.token)
+			}
+		}
+		
 	}
 };
 
@@ -263,14 +278,11 @@ XSSInterface.Listener.prototype = {
 /*
  * Class for performing cross domain javascript function calls.
  * 
- * targetDomain is the hostname to which call should be send.
- * 
- * pathToCookieSetterHTMLFile must be a path residing on targetDomain to the cookie_setter.html file that is provided by this library
+ * @param targetDomain is the hostname to which call should be send.
+ * @param pathToCookieSetterHTMLFile must be a path residing on targetDomain to the cookie_setter.html file that is provided by this library
  *  "http://" + targetDomain + pathToCookieSetterHTMLFile
- * 
- * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
- *
- * win is the window or iframe to which calls are performed
+ * @param channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
+ * @param win is the window or iframe to which calls are performed
  */
 XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channelId, win) {
 	this.domain                     = targetDomain;
@@ -294,6 +306,7 @@ XSSInterface.Caller.prototype = {
 	
 	/*
 	 * Call a method called name on the target domain.
+	 * @param name Name of the method
 	 * All extra parameters to will be forwarded to the remote method.
 	 */
 	call: function (name) {
