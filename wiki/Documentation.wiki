@@ -81,3 +81,9 @@ The call to allowDomain() allows www.one.com to call methods on this listener. T
 registerCallback() registers a callback called "hello" that shows an alert box with its parameter when called.
 
 And finally startEventLoop() tells the listener to start listening for calls.
+
+= Further Reading =
+
+ * [Documentation]
+ * BrowserIssues
+ * [http://code.google.com/p/xssinterface/source/browse/trunk/js/xssinterface.js The Source]
