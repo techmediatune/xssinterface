@@ -16,7 +16,7 @@ function $(id) {
 
 function bind() {
         window.xssListener = new XSSInterface.Listener("1234567890","iframe2");
-        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+        window.xssListener.allowDomain("www.avantaxx.de", "/xssinterface/html/cookie_setter.html");
 
         window.xssListener.registerCallback("hello", function (msg,bgcolor,stuff) { $('output').value = msg;document.body.style.backgroundColor=bgcolor ;} )
 
@@ -40,9 +40,9 @@ function sayHello() {
   <tr>
     <td width="97">My Domain</td>
     <td width="287">
-	<script type="text/javascript">
+	<b><script type="text/javascript">
 	document.write(document.location.hostname)
-	</script>
+	</script></b>
 	</td>
   </tr>
   <tr>

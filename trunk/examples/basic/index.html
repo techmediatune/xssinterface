@@ -12,8 +12,8 @@
 
 
 function bind() {
-	window.xssCaller1 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe1");
-	window.xssCaller2 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe2");
+	window.xssCaller1 = new XSSInterface.Caller("www.avantaxx.net","/xssinterface/html/cookie_setter.html","iframe1");
+	window.xssCaller2 = new XSSInterface.Caller("www.avantaxx.net","/xssinterface/html/cookie_setter.html","iframe2");
 }
 
 function sayHello(which) {
@@ -36,7 +36,20 @@ function $(id) {
 <body onload="bind(); ">
 <h1>xssinterface Demo</h1>
 
-<p>Click a send-Button</p>
+<p>Click a send-Button.</p>
+
+<ul>
+  <li>
+    This only works in Internet Explorer 7 if a <a href="http://www.compactprivacypolicy.org/">p3p privacy policy file</a> is present 
+    (it is not :) or you specifically allow setting of cookies from avantaxx.de and avantaxx.net.</
+  </li>
+  <li>
+    This only works in Safari if you tell it to accept all cookies.
+  </li>
+  <li>
+    If you have trouble, see the <a href="http://code.google.com/p/xssinterface/wiki/BrowserIssues">browser issue page</a>
+  </li>
+</ul>
 
 <form>
 
@@ -44,9 +57,9 @@ function $(id) {
   <tr>
     <td width="97">My Domain</td>
     <td width="287">
-      <script type="text/javascript">
+      <b><script type="text/javascript">
       document.write(document.location.hostname)
-	  </script>
+	  </script></b>
     </td>
   </tr>
   <tr>
@@ -66,13 +79,15 @@ function $(id) {
   </tr>
   <tr>
     <td>IFrame 1</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe.html" width="500" height=200 id="iframe" name="iframe"></iframe></td>
+    <td><iframe src="http://www.avantaxx.net/xssinterface/examples/basic/iframe.html" width="500" height=200 id="iframe" name="iframe"></iframe></td>
   </tr>
   <tr>
     <td>IFrame 2</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
+    <td><iframe src="http://www.avantaxx.net/xssinterface/examples/basic/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
   </tr>
 </table>
+
+
 
 <div id="setter"></div>
 <div id="log"</div>
