@@ -56,19 +56,21 @@ XSSInterface = {};
  * 
  * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
 */
-XSSInterface.Listener  = function (securityToken,channelId) {
-	this.callbacks     = {};
-	this.callbackNames = [];
+XSSInterface.Listener   = function (securityToken,channelId) {
+	this.callbacks      = {};
+	this.callbackNames  = [];
 	
 	if(securityToken  == "" || securityToken == null) throw("Missing Parameter securityToken")
-	this.securityToken = securityToken;
+	this.securityToken  = securityToken;
 	
-	this.channelId  = channelId;
+	this.channelId      = channelId;
 	if(this.channelId == null) {
-		this.channelId = ""
+		this.channelId  = ""
 	}
 	
-	this.cookie        = new XSSInterface.Cookie()
+	this.allowedDomains = [];
+	
+	this.cookie         = new XSSInterface.Cookie()
 }
 
 XSSInterface.Listener.prototype = {
@@ -84,6 +86,10 @@ XSSInterface.Listener.prototype = {
 		// the timeout makes Firefox happy
 		
 		var url = "http://"+hostname+pathToCookieSetterHTMLFile
+		
+		this.allowedDomains.push(hostname);
+		
+		if(this.canPostMessage()) return
 		
 		window.setTimeout(function () {
 			me.cookie.setCrossDomain(url, "token", me.securityToken, me.channelId)
@@ -104,17 +110,36 @@ XSSInterface.Listener.prototype = {
 	 * This should be called from the window.onload event
 	 */
 	startEventLoop: function () {
-		var me = this;
-		window.setInterval( function () { me.execute() }, XSSInterfacePollIntervalMilliSeconds )
+	
+		if(this.canPostMessage()) {
+			document.addEventListener("message", this.makePostMessageHandler(), false)
+		} else {
+			var me = this;
+			window.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
+		}
 	},	
+	
+	
+	canPostMessage:	function () {
+		if(window.postMessage) {
+			return true
+		}
+		return false
+	},
 	
 	// private
 	/*
 	 * Reads a message cookie. If successful, clears the cookie and parses its contents as JSON
 	 */
-	parse: function () {
+	parse: function (data) {
 
-		var json   = this.read();	
+		var json;
+		
+		if(data) {
+			json = data
+		} else {
+			json = this.read();	
+		}
 	
 		if(json != null && json != "") {
 
@@ -150,6 +175,25 @@ XSSInterface.Listener.prototype = {
 	clear: function() {
 		this.cookie.set(this.dataCookieName(),"");
 	},
+	
+	makePostMessageHandler: function () {
+		var me = this;
+		
+		return function (event) {
+			me.handlePostMessage(event)
+		}
+		
+	},
+	
+	handlePostMessage: function (event) {
+		
+		var data  = this.parse(event.data);
+		
+		data.from = event.domain;
+		
+		this.execute(data, true)
+		
+	},
 
 	// private
 	/*
@@ -157,20 +201,32 @@ XSSInterface.Listener.prototype = {
 	 * Throws an error if the security token provided by the message is wrong or if
 	 * the callback name is unknown.
 	 */
-	execute: function () {
-		var data = this.parse();
-
+	execute: function (data, viaPostMessage) {
 		if(data == null) {
 			return
 		}
 		
-		if(data.token != this.securityToken) {
-			throw("Received wrong security token. Expected: "+this.securityToken+" Received: "+data.token)
-		}
-
 		var name  = data.name;
 		var paras = data.paras;
 		var from  = data.from;
+		
+		if(viaPostMessage) {
+			var found = false
+			for(var i = 0; i < this.allowedDomains.length; i++) {
+				if(this.allowedDomains[i] == from) {
+					found = true;
+					break
+				}
+			}
+			if(!found) {
+				throw("Message from "+from+" blocked")
+			}
+		} else {
+ 			if(data.token != this.securityToken) {
+				throw("Received wrong security token. Expected: "+this.securityToken+" Received: "+data.token)
+			}
+		}
+
 		
 		
 		// check whether $name is really a registered function and not something that leaked into this.callbacks through prototype extension
@@ -202,6 +258,8 @@ XSSInterface.Listener.prototype = {
 	}
 };
 
+
+
 /*
  * Class for performing cross domain javascript function calls.
  * 
@@ -211,12 +269,20 @@ XSSInterface.Listener.prototype = {
  *  "http://" + targetDomain + pathToCookieSetterHTMLFile
  * 
  * channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
+ *
+ * win is the window or iframe to which calls are performed
  */
-XSSInterface.Caller = function (targetDomain,pathToCookieSetterHTMLFile,channelId) {
+XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channelId, win) {
 	this.domain                     = targetDomain;
 	this.pathToCookieSetterHTMLFile = pathToCookieSetterHTMLFile
 	
 	this.cookie                     = new XSSInterface.Cookie(XSSInterfaceCookieName)
+	
+	this.win                        = win;
+	
+	if(this.win == null) {
+		this.win = window.frames[channelId]
+	}
 	
 	this.channelId  = channelId;
 	if(this.channelId == null) {
@@ -254,10 +320,17 @@ XSSInterface.Caller.prototype = {
 	 * Save a message cookie under the dall target domain
 	 */
     save: function(data) {
+    
+    	var message = this.serialize(data);
+    
+    	if(this.canPostMessage()) {
+    		this.win.postMessage(message)
+    	} else {
+    		var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
+			this.cookie.setCrossDomain(url, "data", message, this.channelId)
+    	}
     	
-    	var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
     	
-		this.cookie.setCrossDomain(url, "data", this.serialize(data), this.channelId)
 	},
 
 	// private
@@ -274,8 +347,20 @@ XSSInterface.Caller.prototype = {
 	 * Retrieves the security token that grants access to the call target domain
 	 */
 	securityTokenToTargetDomain: function () {
+	
+		if(this.canPostMessage()) {
+			return "postMessage"
+		}
+	
 		var name = XSSInterfaceSecurityTokenCookieName+this.domain
 		return this.cookie.get(name)
+	},
+	
+	canPostMessage:	function () {
+		if(window.postMessage) {
+			return true
+		}
+		return false
 	}
 
 };
