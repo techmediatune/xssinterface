@@ -6,8 +6,9 @@
 || Firefox 1.5 || WinXP || verified ||
 || Firefox 2 || OSX 10.4|| verified ||
 || Firefox 2 || WinXP || verified ||
-|| Firefox 3 || WinXP || Doesn't work but a fallback using HTML 5 postMessage() could be implemented ||
+|| Firefox 3 || WinXP || verifief ||
 || Opera 9   || WinXP || verified ||
-|| Safari    || All || Only works if you switch to accept all cookies in the preference panel. For nightly builds a workaround could be implemented using postMessage() ||
+|| Safari    || All except latest nightlies || Only works if you switch to accept all cookies in the preference panel.  ||
+|| Safari    || Latest nightlies || Should work (Uses postMessage fallback)  ||
 || IE 6      || WinXP || verified ||
 || IE 7      || All || Basically works, but one needs to either place a [http://www.w3.org/TR/P3P/ P3P Privacy Policy] one the sites or the user needs to allow setting of third-party cookies from the participating domains ||
