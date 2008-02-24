@@ -2,7 +2,7 @@
 
 = Browser Issues of xssinterface =
 
-|| Browser   || OS || State ||
+|| *Browser*   || *OS* || *State* ||
 || Firefox 2 || OSX 10.4|| verified ||
 || Firefox 2 || WinXP || verified ||
 || Opera 9   || WinXP || verified ||
