@@ -84,6 +84,6 @@ And finally startEventLoop() tells the listener to start listening for calls.
 
 = Further Reading =
 
- * [Documentation]
+ * [Security]
  * BrowserIssues
  * [http://code.google.com/p/xssinterface/source/browse/trunk/js/xssinterface.js The Source]
