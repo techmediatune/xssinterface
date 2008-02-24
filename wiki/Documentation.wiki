@@ -2,11 +2,11 @@
 
 = Introduction =
 
-xssinterface enables websites to expose a certain sets of javascript callback methods to pages residing on different domains. The site specifies which methods may be called as well as which domains are allowed to call the methods.
+xssinterface enables websites to expose a certain set of javascript callback methods to pages residing on different domains. The site specifies which methods may be called as well as which domains are allowed to call the methods.
 
 = Synopsis =
 
-Place this on the containing page:
+Place this on the container page:
 
 {{{
 function sayHello() {
@@ -25,7 +25,7 @@ window.xssListener.registerCallback("hello", function (msg) { $('output').value 
 window.xssListener.startEventLoop()
 }}}
 
-[http://it.test.avantaxx.de/xssinterface/examples/basic/ Example]
+[http://www.avantaxx.de/xssinterface/examples/basic/ Example]
 
 = How it works? =
 
