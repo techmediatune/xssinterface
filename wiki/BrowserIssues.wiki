@@ -1,6 +1,6 @@
 #summary Describes Browser-Issues of xssinterface
 
-= Browser Issues of this library =
+= Browser Issues of xssinterface =
 
 || Browser   || OS || State ||
 || Firefox 2 || OSX 10.4|| verified ||
