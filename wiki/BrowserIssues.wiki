@@ -3,8 +3,10 @@
 = Browser Issues of xssinterface =
 
 || *Browser*   || *OS* || *State* ||
+|| Firefox 1.5 || WinXP || verified ||
 || Firefox 2 || OSX 10.4|| verified ||
 || Firefox 2 || WinXP || verified ||
+|| Firefox 3 || WinXP || Doesn't work but a fallback using HTML 5 postMessage() could be implemented ||
 || Opera 9   || WinXP || verified ||
 || Safari    || All || Only works if you switch to accept all cookies in the preference panel ||
 || IE 6      || WinXP || verified ||
