@@ -6,7 +6,7 @@
 || Firefox 1.5 || WinXP || verified ||
 || Firefox 2 || OSX 10.4|| verified ||
 || Firefox 2 || WinXP || verified ||
-|| Firefox 3 || WinXP || verifief ||
+|| Firefox 3 || WinXP || verified (Uses postMessage) ||
 || Opera 9   || WinXP || verified ||
 || Safari    || All except latest nightlies || Only works if you switch to accept all cookies in the preference panel.  ||
 || Safari    || Latest nightlies || Should work (Uses postMessage fallback)  ||
