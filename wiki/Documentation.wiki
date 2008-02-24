@@ -29,6 +29,10 @@ window.xssListener.startEventLoop()
 
 = How it works? =
 
+For Browsers that support it, we use the [http://developer.mozilla.org/en/docs/DOM:window.postMessage postMessage()] interface.
+
+For all other browsers, we use the following mechanism:
+
 All sites that participate in the cross domain calls must provide an html file (cookie_setter.html) that is provided by this library that enables other domains to place certain cookie under the domain of the site.
 
 The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
