@@ -29,7 +29,7 @@ window.xssListener.startEventLoop()
 
 = How it works? =
 
-All sites that participate in the cross domain calls must provide an html file that is provided by this library that enables other domains to place certain cookie under the domain of the site.
+All sites that participate in the cross domain calls must provide an html file (cookie_setter.html) that is provided by this library that enables other domains to place certain cookie under the domain of the site.
 
 The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
 
@@ -42,7 +42,7 @@ Lets assume the following:
 http://www.one.com hosts an iframe located at
 http://www.two.com 
 
-The following URL return the file cookie_setter.html from this library:
+The following URLs return the file cookie_setter.html from this library:
 
 * http://www.one.com/cookie_setter.html
 * http://www.and.com/cookie_setter.html
@@ -51,7 +51,7 @@ You might need to edit the file cookie_setter.html to integrate the correct java
 
 == Caller Side ==
 
-The following function call the message hello with the parameter "Hello World" on the domain www.two.com:
+The following function calls the message "hello" with the parameter "Hello World" on the domain www.two.com:
 
 {{{
 function sayHello() {
@@ -74,9 +74,9 @@ window.xssListener.startEventLoop()
 }
 }}}
 
-The listener defined a security token (123456789). This should be a cryptographically secure hash such as a hash of the users session id. Do not use the user session id. The token will be communicated to other domains. The parameter "channel1" tells the listener to respond only to messages on channel1.
+The listener defined a security token (123456789). This should be a cryptographically secure hash such as a hash of the users session id. Do not use the session id directly, because the token will be communicated to other domains. The parameter "channel1" tells the listener to respond only to messages on channel1.
 
-The call to allowDomain() allows www.one.com to call methods on this listener. The second paramter tells the listeners where is find the cookie_setter.html on www.one.com.
+The call to allowDomain() allows www.one.com to call methods on this listener. The second parameter tells the listener where it finds the cookie_setter.html on www.one.com.
 
 registerCallback() registers a callback called "hello" that shows an alert box with its parameter when called.
 
