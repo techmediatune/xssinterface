@@ -1,0 +1,11 @@
+#summary Describes Browser-Issues of xssinterface
+
+= Browser Issues of this library =
+
+|| Browser   || OS || State ||
+|| Firefox 2 || OSX 10.4|| verified ||
+|| Firefox 2 || WinXP || verified ||
+|| Opera 9   || WinXP || verified ||
+|| Safari 2  || OSX 10.4 || verified ||
+|| IE 6      || WinXP || verified ||
+|| IE 7      || All || Basically works, but one needs to either place a [http://www.w3.org/TR/P3P/ P3P Privacy Policy] one the sites or the user needs to allow setting of third-party cookies from the participating domains ||
