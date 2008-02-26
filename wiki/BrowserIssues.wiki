@@ -8,7 +8,7 @@
 || Firefox 2 || WinXP || verified ||
 || Firefox 3 || WinXP || verified (Uses postMessage) ||
 || Opera 9   || WinXP || verified ||
-|| Safari    || All except latest nightlies || Only works if you switch to accept all cookies in the preference panel.  ||
+|| Safari    || All except latest nightlies || Only works if all windows are within the same 2nd level domain or you switch to accept all cookies in the preference panel.  ||
 || Safari    || Latest nightlies || Should work (Uses postMessage fallback)  ||
 || IE 6      || WinXP || verified ||
 || IE 7      || All || Basically works, but one needs to either place a [http://www.w3.org/TR/P3P/ P3P Privacy Policy] one the sites or the user needs to allow setting of third-party cookies from the participating domains ||
