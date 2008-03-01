@@ -13,3 +13,7 @@ Unknown messages are simply discarded. The library makes sure that only methods 
 = Risks =
 
 Methods exposed by addCallback() might be called by an evil third party (For example if a caller has a security hole). The methods should never call eval() on their arguments.
+
+= DOS =
+
+An attacker may be able to perform a DOS attack against messagePassing by passing bogus messages. These will be ignored because the attacker does not know about the security token, but they will still be processed. A workaround is to use a random channel id that the attacker cannot guess. The attacker will still be able to create a lot of bad cookies. But those have a limited livetime of only 2 seconds.
