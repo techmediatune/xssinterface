@@ -1,0 +1,5 @@
+#summary Open list for possible new works arounds for missing postMessage().
+
+
+ * Use Google Gears cross origin workers. Courtesy of Dion Almaer 
+ * Use cross domain swf files
