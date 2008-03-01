@@ -1,7 +1,8 @@
 
 
-//The listener calls this script on the caller domain and checks whether there is a message in the caller message queue
-
+/*
+ * The listener calls this script on the caller domain and checks whether there is a message in the caller message queue
+ */
 
 var wp       = google.gears.workerPool;
 wp.allowCrossOrigin();
@@ -30,8 +31,7 @@ wp.onmessage = function(a, b, message) {
 	var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
 
 	// there is a new message for the recipient
-	if(rs.isValidRow()) {
-		
+	if(rs.isValidRow()) {	
 		var id   = rs.field(0);
 		var text = rs.field(1);
 		db.execute("DELETE from XSSMessageQueue where id=?", [id]); // unqueue message
