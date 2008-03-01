@@ -16,4 +16,4 @@ Methods exposed by addCallback() might be called by an evil third party (For exa
 
 = DOS =
 
-An attacker may be able to perform a DOS attack against messagePassing by passing bogus messages. These will be ignored because the attacker does not know about the security token, but they will still be processed. A workaround is to use a random channel id that the attacker cannot guess. The attacker will still be able to create a lot of bad cookies. But those have a limited livetime of only 2 seconds.
+An attacker may be able to perform a DOS attack against messagePassing by passing bogus messages. These will be ignored because the attacker does not know about the security token, but they will still be processed. A workaround is to use a random channel id that the attacker cannot guess. The attacker will still be able to create a lot of bad cookies. But those have a limited lifetime of only 2 seconds.
