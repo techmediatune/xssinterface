@@ -1,3 +1,5 @@
+// Downloaded unchanged from http://www.json.org/json2.js
+
 /*
     json2.js
     2008-02-14

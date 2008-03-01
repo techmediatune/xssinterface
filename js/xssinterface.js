@@ -50,7 +50,22 @@ var XSSInterfaceSecurityTokenCookieName  = "XSSSecurityToken";
 var XSSInterfaceDebug                    = false;
 
 
-XSSInterface = {};
+XSSInterface = {
+	canPostMessage:	function () {
+		if(window.postMessage || document.postMessage) {
+			return true
+		}
+		return false
+	},
+	
+	canGearsMessage: function () {
+		if(google && google.gears && google.gears.factory) {
+			return true
+		}
+		return false
+	}
+	
+}
 
 /* A listener for cross domain callbacks
  * 
@@ -114,22 +129,34 @@ XSSInterface.Listener.prototype = {
 	 * This should be called from the window.onload event
 	 */
 	startEventLoop: function () {
+		
+		var me = this;
 	
 		if(this.canPostMessage()) {
 			document.addEventListener("message", this.makePostMessageHandler(), false)
-		} else {
-			var me = this;
-			window.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
+		} 
+		else if(this.canGearsMessage()) {
+			var workerPool       = google.gears.factory.create('beta.workerpool');
+			workerPool.onmessage = this.makeGearsMessageHandler();
+			
+			// install a gears message listener on each allowed domain
+			for(var i = 0; i < this.allowedDomains.length; i++) {
+				var domain   = this.allowedDomains[i];
+				var url      = "http://"+domain+"/xssinterface/js/gears_listener.js"; // XXX make path variable
+				var workerId = workerPool.createWorkerFromUrl(url);
+				// XXX turn this into a gears worker. At least we know that it is installed at this point
+				// send message to all workers and check for new message every n milli seconds
+				window.setInterval(function () { workerPool.sendMessage(""+me.channelId, workerId) }, 1000 )
+			}
+		}
+		else {
+			winow.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
 		}
 	},	
 	
 	
-	canPostMessage:	function () {
-		if(window.postMessage) {
-			return true
-		}
-		return false
-	},
+	canPostMessage:	 XSSInterface.canPostMessage,
+	canGearsMessage: XSSInterface.canGearsMessage,
 	
 	// private
 	/*
@@ -189,6 +216,40 @@ XSSInterface.Listener.prototype = {
 		
 	},
 	
+	makeGearsMessageHandler: function () {
+		var me = this;
+		
+		return function (deprecated1, deprecated2, message) {
+			me.handleGearsMessage(deprecated1, deprecated2, message)
+		}
+		
+	},
+	
+	/*
+	 * Handle a message send via google.gears.sendMessage()
+	 */
+	handleGearsMessage: function(deprecated1, deprecated2, message) {
+		// create a fake postMessage event and then use postMessage
+		
+		// Origin is a string of the form scheme://domain:port;
+		// XXX Ugly! Use a real URI-Parser. 
+		var origin = new String(message.origin);
+		var parts  = origin.split("/");
+		var domain = parts[2];
+		parts      = domain.split(":"); // remove port
+		domain     = parts[0];
+		
+		var event = {
+			data:   message.text,
+			domain: domain
+		};
+		
+		this.handlePostMessage(event)
+	},
+	
+	/*
+	 * Handle a message send via window.postMessage() 
+	 */
 	handlePostMessage: function (event) {
 		
 		var data  = this.parse(event.data);
@@ -337,13 +398,41 @@ XSSInterface.Caller.prototype = {
     	var message = this.serialize(data);
     
     	if(this.canPostMessage()) {
-    		this.win.postMessage(message)
-    	} else {
+    		this.postMessage(this.win, message)
+    	} 
+    	else if(this.canGearsMessage()) {
+    		this.sendGearsMessage(message)
+    	}
+    	else {
     		var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
 			this.cookie.setCrossDomain(url, "data", message, this.channelId)
     	}
     	
     	
+	},
+	
+	// private
+	/* 
+	 * Cross Browser postMessage()
+	 */
+	postMessage: function (win, message) {
+		if(win.postMessage) { // HTML 5 Standard
+			return win.postMessage(message)
+		}
+		if(win.document && win.document.postMessage) { // Opera 9
+			return win.document.postMessage(message)
+		}
+	},
+	/*
+	 * Queue a message in the callers Gears message queue
+	 */
+	sendGearsMessage: function(message) {
+		var db = google.gears.factory.create('beta.database');
+		db.open('database-xssinterface');
+		db.execute('create table if not exists XSSMessageQueue' +
+           ' (id INTEGER PRIMARY KEY AUTOINCREMENT, recipient_domain TEXT, channel_id TEXT, message TEXT, insert_time INTEGER)');
+           
+        db.execute('insert into XSSMessageQueue (recipient_domain,channel_id,message,insert_time)  values (?,?,?,?)', [this.domain, this.channelId, message, new Date().getTime()]);
 	},
 
 	// private
@@ -369,12 +458,8 @@ XSSInterface.Caller.prototype = {
 		return this.cookie.get(name)
 	},
 	
-	canPostMessage:	function () {
-		if(window.postMessage) {
-			return true
-		}
-		return false
-	}
+	canPostMessage:	 XSSInterface.canPostMessage,
+	canGearsMessage: XSSInterface.canGearsMessage
 
 };
 
