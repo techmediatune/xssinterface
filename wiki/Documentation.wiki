@@ -46,15 +46,18 @@ Pages must explicitly grant access to their domain by setting a security token c
 
 Lets assume the following:
 
-http://www.one.com hosts an iframe located at
-http://www.two.com 
+http://www.caller.com hosts an iframe located at
+http://www.listener.com 
 
 The following URLs return the file cookie_setter.html from this library:
 
-* http://www.one.com/cookie_setter.html
-* http://www.and.com/cookie_setter.html
+* http://www.caller.com/cookie_setter.html
+* http://www.listener.com/cookie_setter.html
 
 You might need to edit the file cookie_setter.html to integrate the correct javascript file locations.
+
+The following URL returns the file gears_listener.js from this library:
+* http://www.caller.com/gears_listener.js
 
 == Caller Side ==
 
@@ -62,7 +65,7 @@ The following function calls the message "hello" with the parameter "Hello World
 
 {{{
 function sayHello() {
-	var caller = new XSSInterface.Caller("www.two.com","/cookie_setter.html","channel1");
+	var caller = new XSSInterface.Caller("www.listener.com","/cookie_setter.html","channel1");
 	caller.call("hello", "Hello World")
 }
 }}}
@@ -74,7 +77,7 @@ We register an onload-handler that creates a cross domain message listener:
 {{{
 window.onload = function () {
 	window.xssListener = new XSSInterface.Listener("1234567890","channel1");
-	window.xssListener.allowDomain("www.one.com", "/cookie_setter.html");
+	window.xssListener.allowDomain("www.caller.com", "/cookie_setter.html", "/gears_listener.js");
 
 	window.xssListener.registerCallback("hello", function (msg) {alert(msg)} )
 window.xssListener.startEventLoop()
@@ -83,11 +86,15 @@ window.xssListener.startEventLoop()
 
 The listener defined a security token (123456789). This should be a cryptographically secure hash such as a hash of the users session id. Do not use the session id directly, because the token will be communicated to other domains. The parameter "channel1" tells the listener to respond only to messages on channel1.
 
-The call to allowDomain() allows www.one.com to call methods on this listener. The second parameter tells the listener where it finds the cookie_setter.html on www.one.com.
+The call to allowDomain() allows www.caller.com to call methods on this listener. The second parameter tells the listener where it finds the cookie_setter.html on www.caller.com and the third parameter tells it where to find the gears_listener.js file on www.caller.com.
 
 registerCallback() registers a callback called "hello" that shows an alert box with its parameter when called.
 
 And finally startEventLoop() tells the listener to start listening for calls.
+
+=== Diabling Google Gears ===
+
+Usage of Google Gears triggers a one time permission request for each visitor. In case you want to avoid this, you can disable gears support, by setting the variable XSSInterfaceEnableGoogleGearsSupport to false. (See the top of xssinterface.js)
 
 = Further Reading =
 
