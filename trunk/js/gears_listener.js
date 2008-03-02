@@ -27,16 +27,26 @@ wp.onmessage = function(a, b, message) {
 	var maxAge = new Date().getTime() - 2000;
 	db.execute('delete from XSSMessageQueue where insert_time < ?',[maxAge]);
 	
-	// find new messages for me
-	var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
+	db.close();
+	
+	var timer = google.gears.factory.create('beta.timer');
+	timer.setInterval(function() { 
+		// get a new db handle on each iteration
+		var db = google.gears.factory.create('beta.database');
+		db.open('database-xssinterface');
+		
+		// find new messages for me
+		var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
 
-	// there is a new message for the recipient
-	if(rs.isValidRow()) {	
-		var id   = rs.field(0);
-		var text = rs.field(1);
-		db.execute("DELETE from XSSMessageQueue where id=?", [id]); // unqueue message
-		wp.sendMessage(text, message.sender)
-	}
+		// there is a new message for the recipient
+		if(rs.isValidRow()) {	
+			var id   = rs.field(0);
+			var text = rs.field(1);
+			db.execute("DELETE from XSSMessageQueue where id=?", [id]); // unqueue message
+			wp.sendMessage(text, message.sender)
+		}
 
-	rs.close();
+		rs.close();
+		db.close();
+	 }, 300);
 }
