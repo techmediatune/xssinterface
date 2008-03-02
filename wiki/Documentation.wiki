@@ -6,20 +6,21 @@ xssinterface enables websites to expose a certain set of javascript callback met
 
 = Synopsis =
 
-Place this on the container page:
+Place this on the container page (which in this example resides on www.caller.com):
 
 {{{
 function sayHello() {
-	var caller = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","channel1");
+	var caller = new XSSInterface.Caller("www.listener.com","/xssinterface/html/cookie_setter.html","channel1");
 	caller.call("hello", "Hello World")
 }
 }}}
 
-Place this in the widget or iframe:
+Place this in the widget or iframe (which in this examples resides on www.listener.com):
 
 {{{
 window.xssListener = new XSSInterface.Listener("1234567890","channel1");
-window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+window.xssListener.allowDomain("www.caller.com", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+
 
 window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
 window.xssListener.startEventLoop()
@@ -30,6 +31,8 @@ window.xssListener.startEventLoop()
 = How it works? =
 
 For Browsers that support it, we use the [http://developer.mozilla.org/en/docs/DOM:window.postMessage postMessage()] interface.
+
+If the Browser has [http://gears.google.com Google Gears] installed, we use [http://code.google.com/apis/gears/api_workerpool.html Gears cross origin workers].
 
 For all other browsers, we use the following mechanism:
 
