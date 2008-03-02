@@ -8,7 +8,8 @@
 <script type="text/javascript" src="/xssinterface/js/json2.js"></script>
 <script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
 
-
+<script type="text/javascript" src="test_simple.js"></script>
+<script type="text/javascript" src="test.js"></script>
 
 <script type="text/javascript">
 
@@ -16,6 +17,16 @@
 function bind() {
 	window.xssCaller1 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe1");
 	window.xssCaller2 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe2");
+	
+	window.xssListener = new XSSInterface.Listener("1234567890","return");
+    window.xssListener.allowDomain("it2.test.avantaxx.de", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+
+    window.xssListener.registerCallback("ok", ok );
+    window.xssListener.registerCallback("isEq", isEq );
+    window.xssListener.registerCallback("isNotEq", isNotEq );
+    window.xssListener.registerCallback("jsonEq", jsonEq );
+    window.xssListener.startEventLoop()
+		
 }
 
 function sayHello(which) {
@@ -36,22 +47,12 @@ function $(id) {
 </head>
 
 <body onload="bind(); ">
-<h1>xssinterface Demo</h1>
+<h1>xssinterface automated tests</h1>
 
-<p>Click a send-Button.</p>
+<p><input type=button value="Run Test" onclick="runTest()"></p>
 
-<ul>
-  <li>
-    This only works in Internet Explorer 7 if a <a href="http://www.compactprivacypolicy.org/">p3p privacy policy file</a> is present 
-    (it is not :) or you specifically allow setting of cookies from avantaxx.de and avantaxx.net.</
-  </li>
-  <li>
-    This only works in Safari if you tell it to accept all cookies.
-  </li>
-  <li>
-    If you have trouble, see the <a href="http://code.google.com/p/xssinterface/wiki/BrowserIssues">browser issue page</a>
-  </li>
-</ul>
+<div id="testLog" style="">
+</div>
 
 <form>
 
@@ -65,27 +66,12 @@ function $(id) {
     </td>
   </tr>
   <tr>
-    <td width="97">Input</td>
-    <td width="287">
-     Text: <input type="text" name="input" id="input" value="Hello World" /><br />
-     Color:
-     <select id="color">
-       <option value="red">red</option>
-       <option value="yellow">yellow</option>
-       <option value="blue">blue</option>
-       <option value="green">green</option>
-     </select> 
-		<br />
-     <input type="button" value="send to 1" onclick="sayHello(1)" />
-     <input type="button" value="send to 2" onclick="sayHello(2)" /></td>
-  </tr>
-  <tr>
     <td>IFrame 1</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe.html" width="500" height=200 id="iframe1" name="iframe1"></iframe></td>
+    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe.html" width="500" height=200 id="iframe1" name="iframe1"></iframe></td>
   </tr>
   <tr>
     <td>IFrame 2</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/basic/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
+    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
   </tr>
 </table>
 
