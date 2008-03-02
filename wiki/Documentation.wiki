@@ -51,13 +51,13 @@ http://www.listener.com
 
 The following URLs return the file cookie_setter.html from this library:
 
-* http://www.caller.com/cookie_setter.html
-* http://www.listener.com/cookie_setter.html
+ * http://www.caller.com/cookie_setter.html
+ * http://www.listener.com/cookie_setter.html
 
 You might need to edit the file cookie_setter.html to integrate the correct javascript file locations.
 
 The following URL returns the file gears_listener.js from this library:
-* http://www.caller.com/gears_listener.js
+ * http://www.caller.com/gears_listener.js
 
 == Caller Side ==
 
@@ -80,7 +80,7 @@ window.onload = function () {
 	window.xssListener.allowDomain("www.caller.com", "/cookie_setter.html", "/gears_listener.js");
 
 	window.xssListener.registerCallback("hello", function (msg) {alert(msg)} )
-window.xssListener.startEventLoop()
+	window.xssListener.startEventLoop()
 }
 }}}
 
