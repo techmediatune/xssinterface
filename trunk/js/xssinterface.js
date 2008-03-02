@@ -43,6 +43,9 @@
 // This must be done equally on all callers and listeners.
 var XSSInterfaceEnableGoogleGearsSupport  = true;
 
+// Only disable this for debugging
+var XSSInterfaceEnablePostMessageSupport  = true;
+
 // Number of milli seconds between polls for new callbacks
 var XSSInterfacePollIntervalMilliSeconds  = 300;
 // Name of cookie that is used for messages. Should not be changed
@@ -55,6 +58,9 @@ var XSSInterfaceDebug                     = false;
 
 XSSInterface = {
 	canPostMessage:	function () {
+		if(!XSSInterfaceEnablePostMessageSupport) {
+			return false
+		}
 		if(window.postMessage || document.postMessage) {
 			return true
 		}
@@ -66,7 +72,7 @@ XSSInterface = {
 			return false
 		}
 		XSSInterfaceInitializeGears(); // Initialize gears. Now that we know that we need it
-		if(google && google.gears && google.gears.factory) {
+		if(window.google && window.google.gears && window.google.gears.factory) {
 			return true
 		}
 		return false
@@ -82,15 +88,15 @@ XSSInterface = {
  * @param channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
 */
 XSSInterface.Listener   = function (securityToken,channelId) {
-	this.callbacks      = {};
-	this.callbackNames  = [];
+	this.callbacks         = {};
+	this.callbackNames     = [];
 	
 	if(securityToken  == "" || securityToken == null) throw("Missing Parameter securityToken")
-	this.securityToken  = securityToken;
+	this.securityToken     = securityToken;
 	
-	this.channelId      = channelId;
+	this.channelId         = channelId;
 	if(this.channelId == null) {
-		this.channelId  = ""
+		this.channelId     = ""
 	}
 	
 	this.allowedDomains    = [];
@@ -432,10 +438,10 @@ XSSInterface.Caller.prototype = {
 	 * Cross Browser postMessage()
 	 */
 	postMessage: function (win, message) {
-		if(win.postMessage) { // HTML 5 Standard
+		if(window.postMessage) { // HTML 5 Standard
 			return win.postMessage(message)
 		}
-		if(win.document && win.document.postMessage) { // Opera 9
+		if(window.document && window.document.postMessage) { // Opera 9
 			return win.document.postMessage(message)
 		}
 	},
