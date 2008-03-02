@@ -39,6 +39,8 @@
  * 
  */
 
+// Set this to false to diable Google Gears support.
+// This must be done equally on all callers and listeners.
 var XSSInterfaceEnableGoogleGearsSupport  = true;
 
 // Number of milli seconds between polls for new callbacks
@@ -91,9 +93,13 @@ XSSInterface.Listener   = function (securityToken,channelId) {
 		this.channelId  = ""
 	}
 	
-	this.allowedDomains = [];
+	this.allowedDomains    = [];
 	
-	this.cookie         = new XSSInterface.Cookie()
+	
+	this.gearsWorkerPools  = []; // Used to hook workerPools when in Gears mode
+	this.gearsListenerPath = {}; // Used to store the path to the gears_listener.js file on each allowed domain
+	
+	this.cookie            = new XSSInterface.Cookie()
 }
 
 XSSInterface.Listener.prototype = {
@@ -105,17 +111,19 @@ XSSInterface.Listener.prototype = {
 	 *  "http://" + hostname + pathToCookieSetterHTMLFile
 	 * 
 	 */
-	allowDomain: function(hostname, pathToCookieSetterHTMLFile) {
+	allowDomain: function(hostname, pathToCookieSetterHTMLFile, pathToGearsListenerFile) {
 		var me = this;
-		// the timeout makes Firefox happy
-		
-		var url = "http://"+hostname+pathToCookieSetterHTMLFile
 		
 		this.allowedDomains.push(hostname);
 		
-		if(this.canPostMessage()) return
+		if(this.canPostMessage())  return;
+		if(this.canGearsMessage()) {
+			this.gearsListenerPath[hostname] = pathToGearsListenerFile
+		};
 		
+		// the timeout makes Firefox happy
 		window.setTimeout(function () {
+			var url = "http://"+hostname+pathToCookieSetterHTMLFile
 			me.cookie.setCrossDomain(url, "token", me.securityToken, me.channelId)
 		}, 300);
 	},
@@ -147,12 +155,14 @@ XSSInterface.Listener.prototype = {
 			// install a gears message listener on each allowed domain
 			for(var i = 0; i < this.allowedDomains.length; i++) {
 				var domain   = this.allowedDomains[i];
-				var url      = "http://"+domain+"/xssinterface/js/gears_listener.js"; // XXX make path variable
+				var url      = "http://"+domain+this.gearsListenerPath[domain]; // XXX make path variable
 				var workerId = workerPool.createWorkerFromUrl(url);
-				// XXX turn this into a gears worker. At least we know that it is installed at this point. 
-				// Having the timer inside the gear seems to cause databse locking problems, though
-				// send message to all workers and check for new message every n milli seconds
-				window.setInterval(function () { workerPool.sendMessage(""+me.channelId, workerId) }, XSSInterfacePollIntervalMilliSeconds )
+				
+				// send message to the worker. The worker will now now about us (message.origin) and the channelId (message.text)
+				workerPool.sendMessage(""+me.channelId, workerId);
+				
+				// hook me so i dont get out of scope
+				this.gearsWorkerPools[i] = workerPool
 			}
 		}
 		else {

@@ -16,8 +16,8 @@ function $(id) {
 
 function bind() {
         window.xssListener = new XSSInterface.Listener("1234567890","iframe2");
-        //window.xssListener.allowDomain("www.avantaxx.de", "/xssinterface/html/cookie_setter.html");
-        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html");
+        //window.xssListener.allowDomain("www.avantaxx.de", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
 
         window.xssListener.registerCallback("hello", function (msg,bgcolor,stuff) { $('output').value = msg;document.body.style.backgroundColor=bgcolor ;} )
 
