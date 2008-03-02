@@ -2,6 +2,8 @@
 
 = Browser Issues of xssinterface =
 
+The new [http://gears.google.com/ Google Gears] backend (currently only available in the svn version) should work in all Browsers that have Google Gears installed.
+
 || *Browser*   || *OS* || *State* ||
 || Firefox 1.5 || WinXP || verified ||
 || Firefox 2 || OSX 10.4|| verified ||
