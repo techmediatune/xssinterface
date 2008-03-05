@@ -28,8 +28,9 @@ Object.prototype.each = function (func) {
 	}
 }
 
-
-
 String.prototype.uppercaseFirst = function () { // XXX Implement
-	return this;
+	var first = this.substr(0,1);
+	var rest  = this.substr(1,this.length-1);
+	first = first.toUpperCase()
+	return first + rest;
 }

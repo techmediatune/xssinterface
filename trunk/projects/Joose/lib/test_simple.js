@@ -40,7 +40,7 @@ function ok(bool, msg) {
 
 function dump(o) {
 	o.each(function(value,name) {
-		say(""+name+" -> "+value)
+		say("<pre>"+name+" -> "+value+"</pre>")
 	})
 }
 
