@@ -47,7 +47,7 @@ var XSSInterfaceEnableGoogleGearsSupport  = true;
 var XSSInterfaceEnablePostMessageSupport  = true;
 
 // Number of milli seconds between polls for new callbacks
-var XSSInterfacePollIntervalMilliSeconds  = 50;
+var XSSInterfacePollIntervalMilliSeconds  = 200;
 // Name of cookie that is used for messages. Should not be changed
 var XSSInterfaceCookieName                = "XSSData";
 // Name of cookie that is used for the security token
@@ -55,6 +55,7 @@ var XSSInterfaceSecurityTokenCookieName   = "XSSSecurityToken";
 // Enables debug mode. You might want to add <div id=log></div> to your pages
 var XSSInterfaceDebug                     = false;
 
+var XSSMaximumQueryStringLength           = document.all ? 2000 : 6000;
 
 XSSInterface = {
 	canPostMessage:	function () {
@@ -180,7 +181,7 @@ XSSInterface.Listener.prototype = {
 			}
 		}
 		else {
-			this.timer = window.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
+			this.timer = window.setInterval( function () { me.handleCookieMessage() }, XSSInterfacePollIntervalMilliSeconds )
 		}
 	},	
 	
@@ -235,6 +236,23 @@ XSSInterface.Listener.prototype = {
 	 */
 	clear: function() {
 		this.cookie.set(this.dataCookieName(),"");
+	},
+	
+	handleCookieMessage: 	function () {
+		
+		var data = this.parse();
+		
+		if(data) {
+			var calls = data.calls;
+			var token = data.token;
+		
+			for(var i = 0; i < calls.length; i++) {
+				var call = calls[i];
+				call.token = token;
+				this.execute(call, false)
+			}
+		}
+
 	},
 	
 	makePostMessageHandler: function () {
@@ -434,8 +452,7 @@ XSSInterface.Caller.prototype = {
 		var data = {
 			name:  name,
 			paras: args,
-			from:  document.location.hostname,
-			token: this.securityTokenToTargetDomain()
+			from:  document.location.hostname
 		};
 		
 		
@@ -448,23 +465,19 @@ XSSInterface.Caller.prototype = {
 	 */
     save: function(data) {
     
-    	var message = this.serialize(data);
+    	
     
     	if(this.canPostMessage()) {
+    		var message = this.serialize(data);
     		this.postMessage(this.win, message)
     	} 
     	else if(this.canGearsMessage()) {
+    		var message = this.serialize(data);
     		this.sendGearsMessage(message)
     	}
     	else {
-    		var me  = this;
-    		var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
-    		var exe = function () {
-				me.cookie.setCrossDomain(url, "data", message, me.channelId)
-    		}
-    		
-    		this.scheduledCalls.push(exe);
-    		this.callByCookie();
+    		this.scheduledCalls.push(data);
+    		//this.callByCookie();
     	}
 	},
 	
@@ -477,11 +490,38 @@ XSSInterface.Caller.prototype = {
 		var now             = new Date().getTime();
 		
 		if(now - this.lastCallTime > minCallInterval) {
-			var exe = this.scheduledCalls.shift();
-			if(exe) {
-				this.lastCallTime = now
-				exe();
+			this.lastCallTime   = now;
+			var calls           = this.scheduledCalls;
+			this.scheduledCalls = [];
+			
+			var token = this.securityTokenToTargetDomain()
+			
+			var data  = {
+				token: token,
+				calls: []
+			};
+			
+			var message;
+			
+			for(var i = 0; i < calls.length; i++) {
+				var c = calls.shift();
+				data.calls.push(c)
+				var m = this.serialize(data);
+				if(escape(m).length > XSSMaximumQueryStringLength) {
+					if(i == 0) {
+						throw("Unable to call message. Exceeded length limit. Consider reducing parameters.")
+					}
+					// just use the last message
+					calls.unshift(c)
+					break;	
+				}
+				message = m
 			}
+			
+			this.scheduledCalls = calls
+			
+			var url     = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
+			this.cookie.setCrossDomain(url, "data", message, this.channelId)
 		}
 	},
 	
