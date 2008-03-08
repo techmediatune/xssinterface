@@ -3,31 +3,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>xssinterface Demo</title>
-
-<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
-<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
+<title>xssinterface Unit-Test</title>
 
 <script type="text/javascript" src="test_simple.js"></script>
 <script type="text/javascript" src="test.js"></script>
 
+<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
+<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
+
+
+
 <script type="text/javascript">
 
+window.query = new XSSInterface.Query();
 
-function bind() {
-	window.xssCaller1 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe1");
-	window.xssCaller2 = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe2");
-	
-	window.xssListener = new XSSInterface.Listener("1234567890","return");
-    window.xssListener.allowDomain("it2.test.avantaxx.de", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+XSSInterfaceEnablePostMessageSupport = query.param('enablePostMessage') == "1" ? true : false;
+XSSInterfaceEnableGoogleGearsSupport = query.param('enableGoogleGears') == "1" ? true : false;
 
-    window.xssListener.registerCallback("ok", ok );
-    window.xssListener.registerCallback("isEq", isEq );
-    window.xssListener.registerCallback("isNotEq", isNotEq );
-    window.xssListener.registerCallback("jsonEq", jsonEq );
-    window.xssListener.startEventLoop()
-		
-}
 
 function sayHello(which) {
 
@@ -41,6 +33,11 @@ function $(id) {
 	return document.getElementById(id)
 }
 
+function iframeHTML(index) {
+	var html = '<iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe'+index+'.html?enablePostMessage='+window.query.param('enablePostMessage')+'&enableGoogleGears='+window.query.param('enableGoogleGears')+'" width="500" height=200 id="iframe'+index+'" name="iframe'+index+'"></iframe>';
+    return html   
+}
+
 
 </script>
 
@@ -49,7 +46,9 @@ function $(id) {
 <body onload="bind(); ">
 <h1>xssinterface automated tests</h1>
 
-<p><input type=button value="Run Test" onclick="runTest()"></p>
+<p>
+  <input type=button   id=runButton value="Run Test" onclick="runTest()">
+</p>
 
 <div id="testLog" style="">
 </div>
@@ -67,15 +66,21 @@ function $(id) {
   </tr>
   <tr>
     <td>IFrame 1</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe.html" width="500" height=200 id="iframe1" name="iframe1"></iframe></td>
+    <td>
+      <script type="text/javascript">
+        document.write(iframeHTML(1))
+      </script>
+    </td>
   </tr>
   <tr>
     <td>IFrame 2</td>
-    <td><iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe2.html" width="500" height=200 id="iframe2" name="iframe2"></iframe></td>
+    <td>
+      <script type="text/javascript">
+        document.write(iframeHTML(2))
+      </script>  
+    </td>
   </tr>
 </table>
-
-
 
 <div id="setter"></div>
 <div id="log"></div>

@@ -47,7 +47,7 @@ var XSSInterfaceEnableGoogleGearsSupport  = true;
 var XSSInterfaceEnablePostMessageSupport  = true;
 
 // Number of milli seconds between polls for new callbacks
-var XSSInterfacePollIntervalMilliSeconds  = 300;
+var XSSInterfacePollIntervalMilliSeconds  = 50;
 // Name of cookie that is used for messages. Should not be changed
 var XSSInterfaceCookieName                = "XSSData";
 // Name of cookie that is used for the security token
@@ -106,6 +106,14 @@ XSSInterface.Listener   = function (securityToken,channelId) {
 	this.gearsListenerPath = {}; // Used to store the path to the gears_listener.js file on each allowed domain
 	
 	this.cookie            = new XSSInterface.Cookie()
+	
+	this.timer             = null;
+	
+	// Error Callbacks
+	// When defined called with (methodName,callerDomain) when an unknown message is found
+	this.methodNotFoundCallback = null;
+	// When defined called with (methodName,callerDomain,securityToken) when an unauthorized message is called
+	this.blockedMessageCallback = null;
 }
 
 XSSInterface.Listener.prototype = {
@@ -172,7 +180,7 @@ XSSInterface.Listener.prototype = {
 			}
 		}
 		else {
-			window.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
+			this.timer = window.setInterval( function () { me.execute(me.parse(), false) }, XSSInterfacePollIntervalMilliSeconds )
 		}
 	},	
 	
@@ -294,7 +302,10 @@ XSSInterface.Listener.prototype = {
 			return
 		}
 		
-		this.authorizeCall(data, viaPostMessage);
+		if(!this.authorizeCall(data, viaPostMessage)) {
+			// do nothing
+			return
+		}
 		
 		var name  = data.name;
 		var paras = data.paras;
@@ -309,6 +320,10 @@ XSSInterface.Listener.prototype = {
 			} 
 		}
 		if(!found) {
+			if(this.methodNotFoundCallback) {
+				this.methodNotFoundCallback(name, from)
+				return
+			}
 			throw("XSSInterface Error: unknown remote method ["+name+"] called by "+from)
 		}
 		
@@ -337,20 +352,28 @@ XSSInterface.Listener.prototype = {
 	 */
 	authorizeCall: function (data, viaPostMessage) {
 		if(viaPostMessage) {
-			var found = false
 			for(var i = 0; i < this.allowedDomains.length; i++) {
 				if(this.allowedDomains[i] == data.from) {
-					found = true;
-					break
+					return true
 				}
 			}
-			if(!found) {
-				throw("Message from "+data.from+" blocked")
+			if(this.blockedMessageCallback) {
+				// Optional callback (Mostly for testing of errors)
+				this.blockedMessageCallback(data.name, data.from)
 			}
+			XSSdebug("Bocked message from "+data.from)
+			return false
 		} else {
+			
  			if(data.token != this.securityToken) {
-				throw("Received wrong security token. Expected: "+this.securityToken+" Received: "+data.token)
+ 				if(this.blockedMessageCallback) {
+ 					// Optional callback (Mostly for testing of errors)
+					this.blockedMessageCallback(data.name, "unknown",data.token)
+				}
+				XSSdebug("Bocked message with wrong token "+data.token)
+				return false
 			}
+			return true
 		}
 		
 	}
@@ -375,6 +398,9 @@ XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channe
 	
 	this.win                        = win;
 	
+	this.scheduledCalls             = [];
+	this.lastCallTime               = 0;
+	
 	if(this.win == null) {
 		this.win = window.frames[channelId]
 	}
@@ -382,6 +408,11 @@ XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channe
 	this.channelId  = channelId;
 	if(this.channelId == null) {
 		this.channelId = ""
+	}
+	
+	if(!this.canPostMessage() && !this.canGearsMessage()) {
+		var me = this;
+		setInterval(function () { me.callByCookie() }, XSSInterfacePollIntervalMilliSeconds * 20)
 	}
 }
 
@@ -426,11 +457,32 @@ XSSInterface.Caller.prototype = {
     		this.sendGearsMessage(message)
     	}
     	else {
+    		var me  = this;
     		var url = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
-			this.cookie.setCrossDomain(url, "data", message, this.channelId)
+    		var exe = function () {
+				me.cookie.setCrossDomain(url, "data", message, me.channelId)
+    		}
+    		
+    		this.scheduledCalls.push(exe);
+    		this.callByCookie();
     	}
-    	
-    	
+	},
+	
+	callByCookie: function () {
+		
+		if(this.scheduledCalls.length == 0) return
+		
+		var minCallInterval = XSSInterfacePollIntervalMilliSeconds;
+		
+		var now             = new Date().getTime();
+		
+		if(now - this.lastCallTime > minCallInterval) {
+			var exe = this.scheduledCalls.shift();
+			if(exe) {
+				this.lastCallTime = now
+				exe();
+			}
+		}
 	},
 	
 	// private
@@ -562,7 +614,7 @@ XSSInterface.Cookie.prototype = {
 	
 		var from = this.doc.location.hostname;
 		
-		var src = url + '?from='+escape(from)+';'+key+'='+escape(value)+';channelId='+escape(channelId)
+		var src = "" + url + '?from='+escape(from)+'&'+key+'='+escape(value)+'&channelId='+escape(channelId)
 		
 		var html = '<iframe src="'+src+'" width=1 height=1 frameborder="0" border="0"></iframe>'
 		
@@ -577,6 +629,43 @@ XSSInterface.Cookie.prototype = {
 
 }
 
+XSSInterface.Query = function () {
+	this.queryString = window.location.search;
+	this.query       = this.parse();
+}
+
+XSSInterface.Query.prototype = {
+	
+	asHash: function () {
+		return this.query;
+	},
+	
+	param: function (name) {
+		return this.query[name]
+	},
+	
+	parse: function () {
+		var search = this.queryString;
+		var parts  = search.split("?");
+		var search = parts[1];
+
+		if(search == null) {
+			search = "";
+		}
+	
+		parts      = search.split("&");
+	
+		var query  = {};
+	
+		for(var i = 0; i < parts.length; i++) {
+			var pair = parts[i].split("=");
+			query[unescape(pair[0])] = unescape(pair[1])
+		}
+		
+		return query;
+	}
+}
+
 
 /*
  * Used in cookie_setter.html to set a cookie based on parameters given to the file via the query_string
@@ -584,26 +673,9 @@ XSSInterface.Cookie.prototype = {
  */
 XSSInterface.Cookie.setFromLocation = function () {
 
-	var search = window.location.search;
-	var parts  = search.split("?");
-	var search = parts[1];
-
-	if(search == null) {
-		search = "";
-	}
-	
-	parts      = search.split(";");
-	
-	var query  = {};
-	
-	for(var i = 0; i < parts.length; i++) {
-		var pair = parts[i].split("=");
-		query[pair[0]] = unescape(pair[1])
-	}
+	var query  = new XSSInterface.Query().asHash();
 	
 	var cookie = new XSSInterface.Cookie()
-	
-
     
     if(query.data) {
     	var expiration = new Date();
