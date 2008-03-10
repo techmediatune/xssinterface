@@ -26,7 +26,7 @@ function bind() {
 		window.xssCaller   = new XSSInterface.Caller(AllowDomain, "/xssinterface/html/cookie_setter.html","return", window.parent);
 		
         window.xssListener = new XSSInterface.Listener("1234567890","iframe1");
-        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/examples/test/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+        window.xssListener.allowDomain(AllowDomain, "/xssinterface/examples/test/cookie_setter.html", "/xssinterface/js/gears_listener.js");
 
         window.xssListener.registerCallback("hello", function (msg,bgcolor,stuff) { $('output').value = msg;document.body.style.backgroundColor=bgcolor ;} )
 		
