@@ -35,11 +35,13 @@ wp.onmessage = function(a, b, message) {
 		var db = google.gears.factory.create('beta.database');
 		db.open('database-xssinterface');
 		
+		db.execute("BEGIN TRANSACTION");
+		
 		// find new messages for meps 
 		var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
 
 		// there are new messages for the recipient
-		if(rs.isValidRow()) {
+		while(rs.isValidRow()) {
 			var id   = rs.field(0);
 			var text = rs.field(1);
 			wp.sendMessage(text, message.sender);
@@ -48,6 +50,8 @@ wp.onmessage = function(a, b, message) {
 		}
 		
 		rs.close();
+		
+		db.execute("COMMIT")
 		
 		db.close();
 	 }, 300);
