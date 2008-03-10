@@ -35,18 +35,20 @@ wp.onmessage = function(a, b, message) {
 		var db = google.gears.factory.create('beta.database');
 		db.open('database-xssinterface');
 		
-		// find new messages for me
+		// find new messages for meps 
 		var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
 
-		// there is a new message for the recipient
-		while(rs.isValidRow()) {	
+		// there are new messages for the recipient
+		while(rs.isValidRow()) {
 			var id   = rs.field(0);
 			var text = rs.field(1);
-			db.execute("DELETE from XSSMessageQueue where id=?", [id]); // unqueue message
-			wp.sendMessage(text, message.sender)
+			wp.sendMessage(text, message.sender);
+			db.execute("DELETE from XSSMessageQueue where id = ?", [id]); // unqueue message
+			rs.next()
 		}
-
+		
 		rs.close();
+		
 		db.close();
 	 }, 300);
 }
