@@ -39,7 +39,7 @@ wp.onmessage = function(a, b, message) {
 		var rs = db.execute('select id, message from XSSMessageQueue where recipient_domain = ? and channel_id = ?', [recipient, channelId]);
 
 		// there are new messages for the recipient
-		while(rs.isValidRow()) {
+		if(rs.isValidRow()) {
 			var id   = rs.field(0);
 			var text = rs.field(1);
 			wp.sendMessage(text, message.sender);

@@ -20,6 +20,10 @@ window.query = new XSSInterface.Query();
 XSSInterfaceEnablePostMessageSupport = query.param('enablePostMessage') == "1" ? true : false;
 XSSInterfaceEnableGoogleGearsSupport = query.param('enableGoogleGears') == "1" ? true : false;
 
+MyDomain    = document.location.hostname
+// Very bad security hole. DO NOT USE SOMETHING LIKE THIS IN PRODUCTION CODE
+OtherDomain = query.param("otherDomain")
+
 
 function sayHello(which) {
 
@@ -34,7 +38,7 @@ function $(id) {
 }
 
 function iframeHTML(index) {
-	var html = '<iframe src="http://it2.test.avantaxx.de/xssinterface/examples/test/iframe'+index+'.html?enablePostMessage='+window.query.param('enablePostMessage')+'&enableGoogleGears='+window.query.param('enableGoogleGears')+'" width="500" height=200 id="iframe'+index+'" name="iframe'+index+'"></iframe>';
+	var html = '<iframe src="http://'+OtherDomain+'/xssinterface/examples/test/iframe'+index+'.html?enablePostMessage='+window.query.param('enablePostMessage')+'&enableGoogleGears='+window.query.param('enableGoogleGears')+'&allowDomain='+MyDomain+'" width="500" height=200 id="iframe'+index+'" name="iframe'+index+'"></iframe>';
     return html   
 }
 

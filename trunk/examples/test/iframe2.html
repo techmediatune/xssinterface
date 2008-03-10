@@ -15,13 +15,15 @@ var query = new XSSInterface.Query();
 XSSInterfaceEnablePostMessageSupport = query.param('enablePostMessage') == "1" ? true : false;
 XSSInterfaceEnableGoogleGearsSupport = query.param('enableGoogleGears') == "1" ? true : false;
 
+AllowDomain = query.param("allowDomain")
+
 function $(id) {
         return document.getElementById(id)
 }
 
 function bind() {
         window.xssListener = new XSSInterface.Listener("1234567890","iframe2");
-        window.xssListener.allowDomain("it.test.avantaxx.de", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
+        window.xssListener.allowDomain(AllowDomain, "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
 
         window.xssListener.registerCallback("hello", function (msg,bgcolor,stuff) { $('output').value = msg;document.body.style.backgroundColor=bgcolor ;} )
 
