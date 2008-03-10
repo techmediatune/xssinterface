@@ -62,7 +62,7 @@ function diag(msg) {
 
 function ok(bool, msg) {
 	
-	var output = "" + testCounter + (msg ? (" - " + msg) : "")
+	var output = "" + testCounter + " of " + numTest + (msg ? (" - " + msg) : "")
 	if(bool) {
 		say("OK "+output)
 	} else {

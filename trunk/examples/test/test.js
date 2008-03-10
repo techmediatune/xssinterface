@@ -1,6 +1,6 @@
 
 function bind() {
-	window.xssCaller1  = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe1");
+	window.xssCaller1  = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/examples/test/cookie_setter.html","iframe1");
 	window.xssCaller2  = new XSSInterface.Caller("it2.test.avantaxx.de","/xssinterface/html/cookie_setter.html","iframe2");
 	
 	window.xssListener = new XSSInterface.Listener("1234567890","return");

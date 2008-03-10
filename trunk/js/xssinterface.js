@@ -719,7 +719,7 @@ XSSInterface.Cookie.setFromLocation = function () {
     
     if(query.data) {
     	var expiration = new Date();
-		expiration.setTime(expiration.getTime() + 2000);
+		expiration.setTime(expiration.getTime() + 4000);
 		
 		var name = XSSInterfaceCookieName + query.channelId
 		
