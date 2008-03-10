@@ -15,11 +15,8 @@ The new [http://gears.google.com/ Google Gears] backend should work in all Brows
 || IE 6      || WinXP || verified ||
 || IE 7      || All || Basically works, but one needs to either place a [http://www.w3.org/TR/P3P/ P3P Privacy Policy] one the sites or the user needs to allow setting of third-party cookies from the participating domains ||
 
+Feel free to add your results here.
+
 = Test =
 
-You can test xssinterface on these pages:
-
- * [http://www.avantaxx.de/xssinterface/examples/basic/ Demo-Application]
- * [http://it.test.avantaxx.de/xssinterface/examples/test/ Test-Application (Includes latest features, might be unstable)]
-
-Feel free to add your results here.
+To test xssinterface under different controlled circumstances, visit the [AutomatedTests automated testing page].
