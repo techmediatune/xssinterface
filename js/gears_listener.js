@@ -8,6 +8,7 @@ var wp       = google.gears.workerPool;
 wp.allowCrossOrigin();
 wp.onmessage = function(a, b, message) {
 	
+	// parse the hostname out of the messages's origin
 	var origin = new String(message.origin);
 	var parts  = origin.split("/");
 	var domain = parts[2];
@@ -16,8 +17,8 @@ wp.onmessage = function(a, b, message) {
 	
 	var recipient = domain;
 	var channelId = message.text;
-	
 
+	// Create the table in case it is not there yet
 	var db = google.gears.factory.create('beta.database');
 	db.open('database-xssinterface');
 	db.execute('create table if not exists XSSMessageQueue' +
@@ -29,6 +30,7 @@ wp.onmessage = function(a, b, message) {
 	
 	db.close();
 	
+	// Start looking for new messages
 	var timer = google.gears.factory.create('beta.timer');
 	timer.setInterval(function() { 
 		// get a new db handle on each iteration
@@ -44,6 +46,8 @@ wp.onmessage = function(a, b, message) {
 		while(rs.isValidRow()) {
 			var id   = rs.field(0);
 			var text = rs.field(1);
+			
+			// send the message to our creator
 			wp.sendMessage(text, message.sender);
 			db.execute("DELETE from XSSMessageQueue where id = ?", [id]); // unqueue message
 			rs.next()
