@@ -6,7 +6,7 @@ xssinterface enables websites to expose a certain set of javascript callback met
 
 = Synopsis =
 
-Place this on the container page (which in this example resides on www.caller.com):
+Place this on the container page to call the method "hello" on a page residing on www.listener.com (In this example the container page resides on www.caller.com):
 
 {{{
 function sayHello() {
@@ -15,14 +15,15 @@ function sayHello() {
 }
 }}}
 
-Place this in the widget or iframe (which in this examples resides on www.listener.com):
+Place this in the iframe (which in this examples resides on www.listener.com):
 
 {{{
 window.xssListener = new XSSInterface.Listener("1234567890","channel1");
+// Allow calls from www.caller.com
 window.xssListener.allowDomain("www.caller.com", "/xssinterface/html/cookie_setter.html", "/xssinterface/js/gears_listener.js");
 
-
-window.xssListener.registerCallback("hello", function (msg) { $('output').value = msg} )
+// register a method under the name "hello"
+window.xssListener.registerCallback("hello", function (msg) { alert(msg) } )
 window.xssListener.startEventLoop()
 }}}
 
