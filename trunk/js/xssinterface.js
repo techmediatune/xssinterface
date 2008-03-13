@@ -273,19 +273,28 @@ XSSInterface.Listener.prototype = {
 		
 	},
 	
+	extractDomainFromURI: function(uri) {
+		
+		// Origin is a string of the form scheme://domain:port;
+		// XXX Ugly! Use a real URI-Parser. 
+		
+		var uri_string = new String(uri);
+		var parts      = uri_string.split("/");
+		var domain     = parts[2];
+		parts          = domain.split(":"); // remove port
+		domain         = parts[0];
+		return domain
+	},
+	
 	/*
 	 * Handle a message send via google.gears.sendMessage()
 	 */
 	handleGearsMessage: function(deprecated1, deprecated2, message) {
 		// create a fake postMessage event and then use postMessage
 		
-		// Origin is a string of the form scheme://domain:port;
-		// XXX Ugly! Use a real URI-Parser. 
-		var origin = new String(message.origin);
-		var parts  = origin.split("/");
-		var domain = parts[2];
-		parts      = domain.split(":"); // remove port
-		domain     = parts[0];
+		var domain = this.extractDomainFromURI(message.origin);
+		
+		if(!domain) return
 		
 		var event = {
 			data:   message.text,
@@ -300,9 +309,19 @@ XSSInterface.Listener.prototype = {
 	 */
 	handlePostMessage: function (event) {
 		
-		var data  = this.parse(event.data);
+		var data   = this.parse(event.data);
 		
-		data.from = event.domain;
+		var domain;
+		if(event.origin) {
+			domain = this.extractDomainFromURI(event.origin);
+		}
+		else if(event.domain) {
+			domain = event.domain
+		}
+		
+		if(!domain) return
+		
+		data.from = domain
 		
 		this.execute(data, true)
 		
