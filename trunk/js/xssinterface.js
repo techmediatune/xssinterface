@@ -549,11 +549,14 @@ XSSInterface.Caller.prototype = {
 	 * Cross Browser postMessage()
 	 */
 	postMessage: function (win, message) {
+		
+		var targetOrigin = "http://"+this.domain // XXX extend api to specify scheme and port
+		
 		if(window.postMessage) { // HTML 5 Standard
-			return win.postMessage(message)
+			return win.postMessage(message, targetOrigin)
 		}
 		if(window.document && window.document.postMessage) { // Opera 9
-			return win.document.postMessage(message)
+			return win.document.postMessage(message, targetOrigin)
 		}
 	},
 	/*
