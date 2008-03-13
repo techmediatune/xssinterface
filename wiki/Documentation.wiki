@@ -37,7 +37,7 @@ If the Browser has [http://gears.google.com Google Gears] installed, we use [htt
 
 For all other browsers, we use the following mechanism:
 
-All sites that participate in the cross domain calls must provide an html file (cookie_setter.html), that is provided by this library, that enables other domains to place a certain cookie under the domain of the site.
+All sites that participate in the cross domain calls must provide an html file ([http://code.google.com/p/xssinterface/source/browse/trunk/html/cookie_setter.html cookie_setter.html]), that is provided by this library, that enables other domains to place a certain cookie under the domain of the site.
 
 The library uses this mechanism to place cookies on the target domain that are then read and evaluated by the target page.
 
@@ -57,7 +57,7 @@ The following URLs return the file cookie_setter.html from this library:
 
 You might need to edit the file cookie_setter.html to integrate the correct javascript file locations.
 
-The following URL returns the file gears_listener.js from this library:
+The following URL returns the file [http://code.google.com/p/xssinterface/source/browse/trunk/js/gears_listener.js gears_listener.js] from this library:
  * http://www.caller.com/gears_listener.js
 
 == Caller Side ==
