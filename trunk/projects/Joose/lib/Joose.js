@@ -18,6 +18,8 @@ Joose.copyObject = function (source, target) {
 	return target
 };
 
+
+
 Joose.emptyFunction = function () {};
 
 var joose = new Joose();
@@ -43,6 +45,7 @@ Joose.Builders = {
 			var metaClass   = Joose.Class;
 			if(props && props.meta) {
 				metaClass = props.meta
+				delete props.meta
 			}
 			
 			var aClass      = new metaClass();
@@ -63,6 +66,36 @@ Joose.Builders = {
 			
 		}
 		joose.cc = c;
+		if(props) {
+			props.each(function (value, name) { 
+				var builder = Joose.Builders[name];
+				if(!builder) {
+					throw "Called invalid builder "+name+" while creating class "+c.meta.name
+				}
+				var paras   = value;
+				if(!paras.length) {
+					paras = [value]
+				}
+				builder.apply(Joose.Builder, paras)
+			})
+		}
+	},
+	
+	joosify: function (standardClassName, standardClassObject) {
+		var c    = standardClassObject;
+		var metaClass = new Joose.Class();
+		c        = metaClass.createClass(standardClassName, c)
+	
+		var meta = c.meta;
+	
+		for(var name in standardClassObject.prototype) {
+			var value = c.prototype[name]
+			if(typeof(value) == "function") {
+				meta.addMethod(name, value)
+			} else {
+				meta.addAttribute(name, {init: value})
+			}
+		}
 	},
 	
 	requires:	function (methodName) {
@@ -119,6 +152,8 @@ Joose.bootstrap = function () {
 	Joose.Class.meta.addSuperClass(Joose.MetaClass);
 	
 	Joose.Class.meta.addMethod("initialize", function () { this.name = "Joose.Class" })
+	
+	Joose.Builders.joosify("Joose.Method", Joose.Method)
 }
 
 Joose.MetaClassBootstrap = function () {
@@ -146,18 +181,22 @@ Joose.MetaClassBootstrap.prototype = {
 		return c
 	},
 	
-	createClass:	function (name) {
+	createClass:	function (name, optionalClassObject) {
 		
 		var meta  = this.newMetaClass();
 		meta.meta = this;
 		
-		var c     = function () {
-			this.initialize.apply(this, arguments);
-		};
+		var c;
 		
-		c.prototype = {
-			meta: meta
-		};
+		if(optionalClassObject) {
+			c = optionalClassObject
+		} else {
+			c     = function () {
+				this.initialize.apply(this, arguments);
+			};
+		}
+		
+		c.prototype.meta = meta
 		c.meta    = meta;
 		if(name == null) {
 			meta.name = "__anonymous__" 
@@ -332,6 +371,7 @@ joose.init();
 
 Class("Joose.Class");
 methods({
+	
 	instantiate: function () {
 		return new this.c();
 	},
@@ -377,7 +417,6 @@ Class("Joose.Role");
 isa(Joose.Class);
 has("requiresMethodNames")
 methods({
-	
 	initialize: function () {
 		this.name                = "Joose.Role"
 		this.requiresMethodNames = [];
@@ -412,4 +451,6 @@ methods({
 		return complete
 	}
 })
+	
+
 
