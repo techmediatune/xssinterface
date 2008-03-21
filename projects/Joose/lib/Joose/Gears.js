@@ -39,18 +39,43 @@ Class("Joose.Gears", {
 	methods: {
 		initialize: function () {
 			JooseGearsInitializeGears() 
-			this.wp = google.gears.factory.create('beta.workerpool');
-			var me = this;
-			this.wp.onmessage = function (a,b,message) {
-				var paras  = JSON.parse(message.text);
-				var cbName = paras.to;
-				var ret    = paras.ret;
-				var object = me.calls[paras.index];
-				object[cbName].call(object, ret)
-				delete me.calls[paras.index]
+			if(this.canGears()) {
+				this.wp = google.gears.factory.create('beta.workerpool');
+				var me = this;
+				this.wp.onmessage = function (a,b,message) {
+					me.handleGearsMessage(message)
+				}
 			}
 		},
+		
+		handleGearsMessage: function (message) {
+			var paras  = JSON.parse(message.text);
+			var cbName = paras.to;
+			var ret    = paras.ret;
+			var object = this.calls[paras.index];
+			object[cbName].call(object, ret)
+			delete this.calls[paras.index]
+		},
+		
+		canGears: function () {
+			return window.google && window.google.gears && window.google.gears.factory
+		},
+		
 		addWorker:		 function (name, func, props) {
+			
+			var cbName  = "on"+name.uppercaseFirst()
+			
+			// No gears, then work inline
+			if(!this.canGears()) {
+				var wrapped = function () {
+					var ret = func.apply(this, arguments);
+					this[cbName].call(this, ret)
+				}
+				this.addMethod(name, wrapped, props)
+				return
+			}
+			
+			// OK, we have gears support
 			
 			var json = new Joose.SimpleRequest().getText("json2.js")
 				
@@ -67,8 +92,6 @@ Class("Joose.Gears", {
 			var wp      = this.wp;
 			
 			var childId = wp.createWorker(source)
-
-			var cbName  = "on"+name.uppercaseFirst()
 			
 			var me      = this
 				
