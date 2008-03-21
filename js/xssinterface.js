@@ -185,7 +185,10 @@ XSSInterface.Listener.prototype = {
 		}
 	},	
 	
-	
+	// private
+	/*
+	 * Determines whether we can use the postMessage-Interface
+	 */
 	canPostMessage:	 XSSInterface.canPostMessage,
 	canGearsMessage: XSSInterface.canGearsMessage,
 	

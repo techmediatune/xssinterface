@@ -7,15 +7,31 @@
 <script type="text/javascript" src="../lib/test_simple.js"></script>
 <script type="text/javascript" src="../lib/EvilObjectExtension.js"></script>
 <script type="text/javascript" src="../lib/Joose.js"></script>
+<script type="text/javascript" src="../lib/Joose/Gears.js"></script>
+<script type="text/javascript" src="json2.js"></script>
 
 
-<script type="text/javascript" src="../tests/test.js"></script>
+
 
 </head>
 
-<body onload="runTest()">
-<input type=button onclick="runTest()" value="run again"
+<body>
+
 <div id="testLog"></div>
+
+<script type="text/javascript">
+doTestFile("01_sanity.js")
+doTestFile("02_classcreation.js")
+doTestFile("03_methods.js")
+doTestFile("04_inheritance.js")
+doTestFile("05_metaclass_extension.js")
+doTestFile("06_basic_examples.js")
+doTestFile("07_roles.js")
+doTestFile("08_joosify.js")
+doTestFile("09_js_style_building.js")
+doTestFile("10_method_wrappers.js")
+doTestFile("11_gears.js")
+</script>
 
 </body>
 </html>
