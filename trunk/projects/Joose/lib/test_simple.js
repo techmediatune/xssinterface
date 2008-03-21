@@ -13,8 +13,6 @@ function nofail(func, msg) {
 
 
 function initializeTests() {
-	var log = $("testLog");
-	log.innerHTML = "";
 	testCounter = 1;
 }
 
@@ -62,4 +60,21 @@ function isNotEq(a, b, msg) {
 
 function jsonEq(a, b, msg) {
 	ok(JSON.stringify(a) == JSON.stringify(b), msg)
+}
+
+function endTests() {
+	say("<hr />")
+}
+
+function doTestFile(url) {
+	
+	var script = new Joose.SimpleRequest().getText(url);
+	
+	script = "(function () {"+script+"})()"
+	
+	eval(script);
+	
+	/*var script = document.createElement("script");
+	script.src = url;
+	document.body.appendChild(script)*/
 }

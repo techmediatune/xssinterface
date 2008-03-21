@@ -43,10 +43,12 @@ Joose.Builders = {
 		if(c == null) {
 			
 			var metaClass   = Joose.Class;
+			
 			if(props && props.meta) {
 				metaClass = props.meta
 				delete props.meta
 			}
+			
 			
 			var aClass      = new metaClass();
 
@@ -139,6 +141,12 @@ Joose.Builders = {
 		})
 	},
 	
+	workers: function (map) {
+		map.each(function (func, name) {
+			joose.cc.meta.addWorker(name, func)
+		})
+	},
+	
 	before: function(map) {
 		map.each(function (func, name) {
 			joose.cc.meta.wrapMethod(name, "before", func);
@@ -176,14 +184,14 @@ Joose.bootstrap = function () {
 
 	Joose.MetaClass.meta.addNonJooseSuperClass("Joose.MetaClassBootstrap", BOOT)
 	
-	Joose.MetaClass.meta.addMethod("initialize", function () { this.name = "Joose.MetaClass" })
+	Joose.MetaClass.meta.addMethod("initialize", function () { this._name = "Joose.MetaClass" })
 
 	var META = new Joose.MetaClass();
 	
 	Joose.Class = META.createClass("Joose.Class")
 	Joose.Class.meta.addSuperClass(Joose.MetaClass);
 	
-	Joose.Class.meta.addMethod("initialize", function () { this.name = "Joose.Class" })
+	Joose.Class.meta.addMethod("initialize", function () { this._name = "Joose.Class" })
 }
 
 Joose.bootstrap2 = function () {
@@ -201,11 +209,15 @@ Joose.MetaClassBootstrap = function () {
 }
 Joose.MetaClassBootstrap.prototype = {
 	
+	className: function () {
+		return this._name
+	},
+	
 	newMetaClass: function () {
 		
-		var me = this;
-		var c  = Joose.copyObject(this, function () {});
-		c.name = this.name
+		var me  = this;
+		var c   = Joose.copyObject(this, function () {});
+		c._name = this._name
 		
 		c.methodNames    = []
 		c.attributeNames = []
@@ -234,9 +246,9 @@ Joose.MetaClassBootstrap.prototype = {
 		c.prototype.meta = meta
 		c.meta    = meta;
 		if(name == null) {
-			meta.name = "__anonymous__" 
+			meta._name = "__anonymous__" 
 		} else {
-			meta.name = name;
+			meta._name = name;
 		}
 		meta.c = c;
 		
@@ -297,15 +309,15 @@ Joose.MetaClassBootstrap.prototype = {
 	},
 	
 	isa:			function (classObject) {
-		var name = classObject.meta.name
+		var name = classObject.meta.className()
 		// Same type
-		if(this.name == name) {
+		if(this.className() == name) {
 			return true
 		}
 		// Look up into parent classes
 		for(var i = 0; i < this.parentClasses.length; i++) {
 			var parent = this.parentClasses[i].meta
-			if(parent.name == name) {
+			if(parent.className() == name) {
 				return true
 			}
 			if(parent.isa(classObject)) {
@@ -447,7 +459,7 @@ Class("Joose.Class", {
 			var me = this;
 			this.roles.each(function(role) {
 				if(!role.meta.isImplementedBy(c)) {
-					throw("Class "+me.name+" does not fully implement the role "+role.meta.name)
+					throw("Class "+me.className()+" does not fully implement the role "+role.meta.className())
 				}
 			})
 		}
@@ -467,7 +479,7 @@ Class("Joose.Role", {
 	has: ["requiresMethodNames"],
 	methods: {
 		initialize: function () {
-			this.name                = "Joose.Role"
+			this._name               = "Joose.Role"
 			this.requiresMethodNames = [];
 		},
 		
