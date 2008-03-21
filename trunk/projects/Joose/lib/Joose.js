@@ -73,7 +73,7 @@ Joose.Builders = {
 					throw "Called invalid builder "+name+" while creating class "+c.meta.name
 				}
 				var paras   = value;
-				if(!paras.length) {
+				if(! (paras instanceof Array )) {
 					paras = [value]
 				}
 				builder.apply(Joose.Builder, paras)
@@ -117,8 +117,16 @@ Joose.Builders = {
 		joose.cc.meta.addRole(roleClass)
 	},
 	
-	has:	function (name, props) {
-		joose.cc.meta.addAttribute(name, props)
+	has:	function (map) {
+		if(typeof map == "string") {
+			var name  = arguments[0];
+			var props = arguments[1];
+			joose.cc.meta.addAttribute(name, props)
+		} else { // name is a map
+			map.each(function (props, name) {
+				joose.cc.meta.addAttribute(name, props)
+			})
+		}
 	},
 	
 	method: function (name, func, props) {
@@ -129,6 +137,30 @@ Joose.Builders = {
 		map.each(function (func, name) {
 			joose.cc.meta.addMethod(name, func)
 		})
+	},
+	
+	before: function(map) {
+		map.each(function (func, name) {
+			joose.cc.meta.wrapMethod(name, "before", func);
+		}) 
+	},
+	
+	after: function(map) {
+		map.each(function (func, name) {
+			joose.cc.meta.wrapMethod(name, "after", func);
+		}) 
+	},
+	
+	wrap: function(map) {
+		map.each(function (func, name) {
+			joose.cc.meta.wrapMethod(name, "wrap", func);
+		}) 
+	},
+	
+	override: function(map) {
+		map.each(function (func, name) {
+			joose.cc.meta.wrapMethod(name, "override", func);
+		}) 
 	},
 	
 	rw: "rw",
@@ -152,7 +184,10 @@ Joose.bootstrap = function () {
 	Joose.Class.meta.addSuperClass(Joose.MetaClass);
 	
 	Joose.Class.meta.addMethod("initialize", function () { this.name = "Joose.Class" })
-	
+}
+
+Joose.bootstrap2 = function () {
+	// Turn Joose.Method into a Joose.Class object
 	Joose.Builders.joosify("Joose.Method", Joose.Method)
 }
 
@@ -280,7 +315,9 @@ Joose.MetaClassBootstrap.prototype = {
 		return false
 	},
 	
-	
+	wrapMethod:  function (name, wrappingStyle, func) {
+		this.addMethodObject( this.getMethodObject(name)[wrappingStyle](func) )
+	},
 	
 	dispatch:		function (name) {
 		return this.getMethodObject(name).asFunction()
@@ -294,7 +331,7 @@ Joose.MetaClassBootstrap.prototype = {
 	
 	addMethodObject:		 function (method) {
 		var m              = method;
-		var name           = m.name();
+		var name           = m.getName();
 		if(!this.methodNames.exists(name)) {
 			this.methodNames.push(name);
 		}
@@ -318,7 +355,7 @@ Joose.MetaClassBootstrap.prototype = {
 			});
 		}
 		this.c.prototype[name] = null;
-		if(props && props.init) {
+		if(props && props.init != null) {
 			this.c.prototype[name] = props.init;
 		}
 		
@@ -343,9 +380,9 @@ Joose.Method = function (name, func, props) {
 }
 
 Joose.Method.prototype = {
-	name:	function () { return this._name },
-	body:	function () { return this._body },
-	props:	function () { return this._props },
+	getName:	function () { return this._name },
+	getBody:	function () { return this._body },
+	getProps:	function () { return this._props },
 	
 	apply:	function (thisObject, args) {
 		return this._body.apply(thisObject, args)
@@ -369,86 +406,146 @@ Joose.Method.prototype = {
 Joose.bootstrap()
 joose.init();
 
-Class("Joose.Class");
-methods({
+// Extend Joose.Class using Joose's mechanism
+Class("Joose.Class", {
+	methods: {
 	
-	instantiate: function () {
-		return new this.c();
-	},
+		instantiate: function () {
+			//var o = new this.c.apply(this, arguments);
+		
+			// Ough! Calling a constructor with arbitrary arguments hack
+  			var f = function () {};
+  			f.prototype = this.c.prototype;
+  			f.prototype.constructor = this.c;
+  			var obj = new f();
+  			this.c.apply(obj, arguments);
+  			return obj;
+		},
 	
-	can: function (methodName) {
-		return this.methodNames.exists(methodName)
-	},
+		can: function (methodName) {
+			return this.methodNames.exists(methodName)
+		},
 	
-	does: function (classObject) {
-		return classObject.meta.implementsMyMethods(this.getClassObject())
-	},
+		does: function (classObject) {
+			return classObject.meta.implementsMyMethods(this.getClassObject())
+		},
 	
-	implementsMyMethods: function (classObject) {
-		var complete = true
-		this.getMethodNames().each(function (value) {
-			var found = classObject.meta.can(value)
-			if(!found) {
-				complete = false
-			}
-		})
-		return complete
-	},
+		implementsMyMethods: function (classObject) {
+			var complete = true
+			this.getMethodNames().each(function (value) {
+				var found = classObject.meta.can(value)
+				if(!found) {
+					complete = false
+				}
+			})
+			return complete
+		},
 	
-	// Checks whether class is valid
-	validateClass: function () {
-		var c  = this.getClassObject();
-		var me = this;
-		this.roles.each(function(role) {
-			if(!role.meta.isImplementedBy(c)) {
-				throw("Class "+me.name+" does not fully implement the role "+role.meta.name)
-			}
-		})
+		// Checks whether class is valid
+		validateClass: function () {
+			var c  = this.getClassObject();
+			var me = this;
+			this.roles.each(function(role) {
+				if(!role.meta.isImplementedBy(c)) {
+					throw("Class "+me.name+" does not fully implement the role "+role.meta.name)
+				}
+			})
+		}
+	
 	}
-	
 })
+
+Joose.bootstrap2()
 
 
 /*
  * An Implementation of Traits
  * see http://www.iam.unibe.ch/~scg/cgi-bin/scgbib.cgi?query=nathanael+traits+composable+units+ecoop
  */
-Class("Joose.Role");
-isa(Joose.Class);
-has("requiresMethodNames")
-methods({
-	initialize: function () {
-		this.name                = "Joose.Role"
-		this.requiresMethodNames = [];
-	},
-	
-	addRequirement: function (methodName) {
-		this.requiresMethodNames.push(methodName)
-	},
-	
-	exportTo: function (classObject) {
-		classObject.meta.importMethods(this.getClassObject())
-	},
-	
-	hasRequiredMethods: function (classObject) {
-		var complete = true
-		this.requiresMethodNames.each(function (value) {
-			var found = classObject.meta.can(value)
-			if(!found) {
-				complete = false
-			}
-		})
-		return complete
-	},
-	
-	isImplementedBy: function (classObject) {
+Class("Joose.Role", {
+	isa: Joose.Class,
+	has: ["requiresMethodNames"],
+	methods: {
+		initialize: function () {
+			this.name                = "Joose.Role"
+			this.requiresMethodNames = [];
+		},
 		
-		var complete = this.hasRequiredMethods(classObject);
+		addRequirement: function (methodName) {
+			this.requiresMethodNames.push(methodName)
+		},
 	
-		if(complete) {
-			complete = this.implementsMyMethods(classObject);
+		exportTo: function (classObject) {
+			classObject.meta.importMethods(this.getClassObject())
+		},
+	
+		hasRequiredMethods: function (classObject) {
+			var complete = true
+			this.requiresMethodNames.each(function (value) {
+				var found = classObject.meta.can(value)
+				if(!found) {
+					complete = false
+				}
+			})
+			return complete
+		},
+	
+		isImplementedBy: function (classObject) {
+		
+			var complete = this.hasRequiredMethods(classObject);
+	
+			if(complete) {
+				complete = this.implementsMyMethods(classObject);
+			}
+			return complete
 		}
-		return complete
+	}
+})
+
+Class("Joose.Method", {
+	methods: {
+		
+		// creates a new method object with the same name
+		_makeWrapped: function (func) {
+			return this.meta.instantiate(this.getName(), func); // Should there be , this.getProps() ???
+		},
+		
+		wrap: function (func) {
+			var orig = this.getBody();
+			return this._makeWrapped(function () {
+				var me = this;
+				var bound = function () { return orig.apply(me, arguments) }
+				return func.apply(this, [bound].pushArray(arguments))
+			})			
+		},
+		before: function (func) {
+			var orig = this.getBody();
+			return this._makeWrapped(function () {
+				func.apply(this, arguments)
+				return orig.apply(this, arguments);
+			})		
+		},
+		after: function (func) {
+			var orig = this.getBody();
+			return this._makeWrapped(function () {
+				var ret = orig.apply(this, arguments);
+				func.apply(this, arguments);
+				return ret
+			})
+		},
+		
+		override: function (func) {
+			var orig = this.getBody();
+			return this._makeWrapped(function () {
+				var me      = this;
+				var bound   = function () { return orig.apply(me, arguments) }
+				var before  = this.SUPER;
+				this.SUPER  = bound;
+				var ret     = func.apply(this, arguments);
+				this.SUPER  = before;
+				return ret
+			})			
+		}
 	}
 })
 	
