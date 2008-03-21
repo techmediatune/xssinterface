@@ -10,6 +10,11 @@ Array.prototype.each = function (func) {
 	}
 }
 
+Array.prototype.pushArray = function (array) {
+	this.push.apply(this, array)
+	return this
+}
+
 Array.prototype.exists = function (value) {
 	for(var i = 0; i < this.length; i++) {
 		if(this[i] == value) {
