@@ -1,4 +1,4 @@
-initializeTests()
+plan(24)
 
 diag("Some nice examples")
 

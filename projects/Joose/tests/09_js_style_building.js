@@ -1,4 +1,4 @@
-initializeTests()
+plan(6)
 
 diag("Alternative Building")
 

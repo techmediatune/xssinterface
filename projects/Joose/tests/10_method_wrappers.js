@@ -1,6 +1,4 @@
-	
-
-initializeTests()
+plan(11)
 
 
 diag("Method wrappers");

@@ -1,5 +1,6 @@
 
-var testCounter = 1;
+var totalTestCounter = 0;
+var totalTestErrors  = 0;
 
 function nofail(func, msg) {
 	try {
@@ -12,8 +13,11 @@ function nofail(func, msg) {
 }
 
 
-function initializeTests() {
-	testCounter = 1;
+function plan(count) {
+	testCount   = count
+	testCounter = 0;
+	testErrors  = 0;
+	say("<hr />")
 }
 
 function say(msg) {
@@ -27,11 +31,12 @@ function diag(msg) {
 
 function ok(bool, msg) {
 	
-	var output = "" + testCounter + (msg ? (" - " + msg) : "")
+	var output = "" + (testCounter+1) + (msg ? (" - " + msg) : "")
 	if(bool) {
 		say("OK "+output)
 	} else {
 		say("<span style='color: red'>NOT OK "+output+"</span>")
+		testErrors++
 	}
 	testCounter++
 }
@@ -62,19 +67,38 @@ function jsonEq(a, b, msg) {
 	ok(JSON.stringify(a) == JSON.stringify(b), msg)
 }
 
-function endTests() {
+function testReport() {
 	say("<hr />")
+	var color = "green";
+	if(totalTestErrors > 0) {
+		color = "red"
+	}
+	say("Tests done.")
+	say("<strong><span style='color:"+color+"'>Ran "+totalTestCounter+" and failed "+totalTestErrors+" tests.</span></strong>")
+}
+
+function endTests() {
+	if(testCount) {
+		var message = "All tests successfull.";
+		if(testErrors > 0) {
+			totalTestErrors += testError
+			message = ""+testErrors + " tests failed."
+		}
+		totalTestCounter += testCounter
+		diag("Ran "+testCounter+" of "+testCount+" tests. " + message)
+		
+	}
 }
 
 function doTestFile(url) {
 	
-	var script = new Joose.SimpleRequest().getText(url);
+	/*var script = new Joose.SimpleRequest().getText(url);
 	
 	script = "(function () {"+script+"})()"
 	
 	eval(script);
-	
-	/*var script = document.createElement("script");
+	*/
+	var script = document.createElement("script");
 	script.src = url;
-	document.body.appendChild(script)*/
+	document.body.appendChild(script)
 }
