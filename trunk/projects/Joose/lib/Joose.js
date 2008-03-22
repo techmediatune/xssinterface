@@ -24,165 +24,7 @@ Joose.emptyFunction = function () {};
 
 var joose = new Joose();
 
-Joose.Builders = {
-	Class:	function (name, props) {
-		
-		var c = null;
-		
-		if(name) {
-			var root       = joose.top;
-			var nameString = new String(name);
-			var parts      = nameString.split(".")
-		
-			for(var i = 0; i < parts.length; i++) {
-				root = root[parts[i]]
-			}
-			c = root;
-		}
 
-		if(c == null) {
-			
-			var metaClass   = Joose.Class;
-			
-			if(props && props.meta) {
-				metaClass = props.meta
-				delete props.meta
-			}
-			
-			
-			var aClass      = new metaClass();
-
-			var c           = aClass.createClass(name)
-			if(name) {
-				var root = joose.top;
-				var n = new String(name);
-				var parts = n.split(".");
-				for(var i = 0; i < parts.length - 1; i++) {
-					if(root[parts[i]] == null) {
-						root[parts[i]] = {};
-					}
-					root = root[parts[i]]
-				}
-				root[parts[parts.length - 1]] = c
-			}
-			
-		}
-		joose.cc = c;
-		if(props) {
-			props.each(function (value, name) { 
-				var builder = Joose.Builders[name];
-				if(!builder) {
-					throw "Called invalid builder "+name+" while creating class "+c.meta.name
-				}
-				var paras   = value;
-				if(! (paras instanceof Array )) {
-					paras = [value]
-				}
-				builder.apply(Joose.Builder, paras)
-			})
-		}
-	},
-	
-	joosify: function (standardClassName, standardClassObject) {
-		var c    = standardClassObject;
-		var metaClass = new Joose.Class();
-		c        = metaClass.createClass(standardClassName, c)
-	
-		var meta = c.meta;
-	
-		for(var name in standardClassObject.prototype) {
-			var value = c.prototype[name]
-			if(typeof(value) == "function") {
-				meta.addMethod(name, value)
-			} else {
-				meta.addAttribute(name, {init: value})
-			}
-		}
-	},
-	
-	requires:	function (methodName) {
-		if(!joose.cc.meta.meta.isa(Joose.Role)) { // XXX should this be does?
-			throw("Keyword 'requires' only available classes with a meta class of type Joose.Role")
-		}
-		joose.cc.meta.addRequirement(methodName)
-	},
-	
-	check:	function () {
-		joose.cc.meta.validateClass()
-	},
-	
-	isa:	function (classObject) {
-		joose.cc.meta.addSuperClass(classObject)
-	},
-	
-	does:	function (roleClass) {
-		joose.cc.meta.addRole(roleClass)
-	},
-	
-	has:	function (map) {
-		if(typeof map == "string") {
-			var name  = arguments[0];
-			var props = arguments[1];
-			joose.cc.meta.addAttribute(name, props)
-		} else { // name is a map
-			map.each(function (props, name) {
-				joose.cc.meta.addAttribute(name, props)
-			})
-		}
-	},
-	
-	method: function (name, func, props) {
-		joose.cc.meta.addMethod(name, func, props)
-	},
-	
-	methods: function (map) {
-		map.each(function (func, name) {
-			joose.cc.meta.addMethod(name, func)
-		})
-	},
-	
-	workers: function (map) {
-		map.each(function (func, name) {
-			joose.cc.meta.addWorker(name, func)
-		})
-	},
-	
-	before: function(map) {
-		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "before", func);
-		}) 
-	},
-	
-	after: function(map) {
-		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "after", func);
-		}) 
-	},
-	
-	around: function(map) {
-		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "around", func);
-		}) 
-	},
-	
-	override: function(map) {
-		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "override", func);
-		}) 
-	},
-	
-	augment: function(map) {
-		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "augment", func, function () {
-				joose.cc.meta.addMethod(name, func)
-			});
-		}) 
-	},
-	
-	rw: "rw",
-	ro: "ro"
-	 
-};
 
 Joose.bootstrap = function () {
 	// Bootstrap
@@ -208,12 +50,12 @@ Joose.bootstrap2 = function () {
 }
 
 Joose.MetaClassBootstrap = function () {
-	this.name				=    "Joose.MetaClassBootstrap";
-	this.methodNames		=	 [];
-	this.attributeNames		=	 ["name", "methodNames", "attributeNames", "methods", "parentClasses"];
-	this.methods			=    {};
-	this.parentClasses		= 	 [];
-	this.roles              =    [];
+	this._name			  = "Joose.MetaClassBootstrap";
+	this.methodNames	  =	[];
+	this.attributeNames   =	["_name", "methodNames", "attributeNames", "methods", "parentClasses"];
+	this.methods		  = {};
+	this.parentClasses	  = [];
+	this.roles            = [];
 }
 Joose.MetaClassBootstrap.prototype = {
 	
@@ -260,8 +102,24 @@ Joose.MetaClassBootstrap.prototype = {
 		}
 		meta.c = c;
 		
-		meta.addMethod("initialize", Joose.emptyFunction)
+		if(!c.prototype.initialize) {
+			meta.addMethod("initialize", this.initializer())
+		}
 		return c;
+	},
+	
+	initializer: function () {
+		return function (paras) {
+			if(paras) {
+				var names = this.meta.getAttributeNames();
+				for(var i = 0; i < names.length; i++) {
+					var name = names[i];
+					if(typeof paras[name] != "undefined") {
+						this[name] = paras[name]
+					} 
+				}
+			}
+		}
 	},
 	
 	addRole: function (roleClass) {
@@ -296,9 +154,7 @@ Joose.MetaClassBootstrap.prototype = {
 		//alert("Super"+me.name + " -> "+classObject.meta.name +"->" + names)
 		
 		names.each(function (name) {
-
 			var m = classObject.meta.dispatch(name);
-			
 			me.addMethodObject(m.meta)
 		})
 	},
@@ -367,7 +223,7 @@ Joose.MetaClassBootstrap.prototype = {
 		}
 		this.methods[name] = m;
 		
-		this.c.prototype[name] = m.asFunction();
+		method.addToClass(this.c)
 	},
 	
 	addAttribute:	 function (name, props) {
@@ -396,23 +252,33 @@ Joose.MetaClassBootstrap.prototype = {
 		return this.methods[name]
 	},
 	
+	getAttributeNames: function () {
+		return this.attributeNames;
+	},
+	
 	getMethodNames:	function () {
 		return this.methodNames;
 	}
 };
 
 Joose.Method = function (name, func, props) {
-	this._name  = name;
-	this._body  = func;
-	this._props = props;
-	
-	func.meta   = this
+	this.initialize(name, func, props)
 }
 
 Joose.Method.prototype = {
 	getName:	function () { return this._name },
 	getBody:	function () { return this._body },
 	getProps:	function () { return this._props },
+	
+	initialize: function (name, func, props) {
+		this._name  = name;
+		this._body  = func;
+		this._props = props;
+	
+		func.meta   = this
+	},
+	
+	isClassMethod: function () { return false },
 	
 	apply:	function (thisObject, args) {
 		return this._body.apply(thisObject, args)
@@ -427,6 +293,10 @@ Joose.Method.prototype = {
 		}
 	},
 	
+	addToClass: function (c) {
+		c.prototype[this.getName()] = this.asFunction()
+	},
+	
 	// direct call
 	asFunction:	function () {
 		return this._body
@@ -434,7 +304,7 @@ Joose.Method.prototype = {
 }
 
 Joose.bootstrap()
-joose.init();
+
 
 
 

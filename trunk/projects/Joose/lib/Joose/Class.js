@@ -43,7 +43,6 @@ Class("Joose.Class", {
 				}
 			})
 		}
-	
 	}
 })
 
