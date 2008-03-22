@@ -1,4 +1,4 @@
-plan(11)
+plan(12)
 
 
 diag("Method wrappers");
@@ -71,7 +71,7 @@ l3.add()
 ok(l3.result == "543215432167", "After wrappers work");
 
 Class("Level3", {	
-	wrap: {
+	around: {
 		add: function (original) { this.result += "8"; original(); this.result += "9" }
 	}
 })
@@ -125,5 +125,36 @@ ok(o.result1 == "21", "Overriding works")
 o.two()
 
 ok(o.result2 == "321", "Overriding works on the second level two")
+
+
+Class("HTMLDoc", {
+	augment: {
+		html: function () { return "<html>"+this.INNER()+"</html>" }
+	}
+})
+
+
+
+Class("HTMLDocBody", {
+	isa: HTMLDoc,
+	augment: {
+		html: function () { return "<head>"+this.head()+"</head><body>"+this.INNER()+"</body>" },
+		head: function () { return "<title>"+this.INNER()+"</title>" }
+	}
+})
+
+
+Class("TPSReport", {
+	isa: HTMLDocBody,
+	augment: {
+		html: function () { return "<h1>TPS-Report</h1>" },
+		head: function () { return "TPS-Report" }
+	}
+})
+
+var tps = new TPSReport();
+var report = tps.html();
+ok(report == "<html><head><title>TPS-Report</title></head><body><h1>TPS-Report</h1></body></html>", "Augment method modifier works");
+
 
 endTests()

@@ -159,15 +159,23 @@ Joose.Builders = {
 		}) 
 	},
 	
-	wrap: function(map) {
+	around: function(map) {
 		map.each(function (func, name) {
-			joose.cc.meta.wrapMethod(name, "wrap", func);
+			joose.cc.meta.wrapMethod(name, "around", func);
 		}) 
 	},
 	
 	override: function(map) {
 		map.each(function (func, name) {
 			joose.cc.meta.wrapMethod(name, "override", func);
+		}) 
+	},
+	
+	augment: function(map) {
+		map.each(function (func, name) {
+			joose.cc.meta.wrapMethod(name, "augment", func, function () {
+				joose.cc.meta.addMethod(name, func)
+			});
 		}) 
 	},
 	
@@ -327,8 +335,18 @@ Joose.MetaClassBootstrap.prototype = {
 		return false
 	},
 	
-	wrapMethod:  function (name, wrappingStyle, func) {
-		this.addMethodObject( this.getMethodObject(name)[wrappingStyle](func) )
+	wrapMethod:  function (name, wrappingStyle, func, notPresentCB) {
+		
+		var orig = this.getMethodObject(name);
+		if(orig) {
+			this.addMethodObject( orig[wrappingStyle](func) )
+		} else {
+			if(notPresentCB) {
+				notPresentCB()
+			} else {
+				throw "Unable to apply "+wrappingStyle+" method modifier because method "+name+" does not exist"
+			}
+		}
 	},
 	
 	dispatch:		function (name) {
