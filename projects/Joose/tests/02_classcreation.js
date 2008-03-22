@@ -1,4 +1,4 @@
-plan(17)
+plan(19)
 	
 diag("MetaClass");
 	
@@ -54,5 +54,14 @@ ok(o3 != o, "The two objects from TestClass differ")
 ok(o3, "We made a second object from TestClass");
 ok(o3.test, "o3 has test");
 ok(o3.another, "o3 has another");
+
+
+var o4 = new TestClass({
+	test: "newVal",
+	another: "fooBar"
+})
+
+ok(o4.test == "newVal", "Initializer works");
+ok(o4.another == "fooBar", "Initializer works for another parameter")
 
 endTests()
