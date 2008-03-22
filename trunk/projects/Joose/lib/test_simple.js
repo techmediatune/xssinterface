@@ -82,7 +82,7 @@ function endTests() {
 	if(testCount) {
 		var message = "All tests successfull.";
 		if(testErrors > 0) {
-			totalTestErrors += testError
+			totalTestErrors += testErrors
 			message = ""+testErrors + " tests failed."
 		}
 		totalTestCount   += testCount

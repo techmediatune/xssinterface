@@ -6,7 +6,7 @@ Class("Joose.Method", {
 			return this.meta.instantiate(this.getName(), func); // Should there be , this.getProps() ???
 		},
 		
-		wrap: function (func) {
+		around: function (func) {
 			var orig = this.getBody();
 			return this._makeWrapped(function () {
 				var me = this;
@@ -41,6 +41,26 @@ Class("Joose.Method", {
 				this.SUPER  = before;
 				return ret
 			})			
+		},
+		
+		augment: function (func) {
+			var orig = this.getBody();
+			orig.source = orig.toString();
+			return this._makeWrapped(function () {
+				var exe       = orig;
+				var me        = this;
+				var inner     = func
+				inner.source  = inner.toString();
+				if(!this.__INNER_STACK__) {
+					this.__INNER_STACK__ = [];
+				};
+				this.__INNER_STACK__.push(inner)
+				var before    = this.INNER;
+				this.INNER    = function () {return  me.__INNER_STACK__.pop().apply(me, arguments) };
+				var ret       = orig.apply(this, arguments);
+				this.INNER    = before;
+				return ret
+			})
 		}
 	}
 })
