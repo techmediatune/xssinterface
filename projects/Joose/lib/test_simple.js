@@ -1,6 +1,7 @@
 
 var totalTestCounter = 0;
 var totalTestErrors  = 0;
+var totalTestCount   = 0;
 
 function nofail(func, msg) {
 	try {
@@ -74,7 +75,7 @@ function testReport() {
 		color = "red"
 	}
 	say("Tests done.")
-	say("<strong><span style='color:"+color+"'>Ran "+totalTestCounter+" and failed "+totalTestErrors+" tests.</span></strong>")
+	say("<strong><span style='color:"+color+"'>Ran "+totalTestCounter+" of "+totalTestCount+" tests and failed "+totalTestErrors+" tests.</span></strong>")
 }
 
 function endTests() {
@@ -84,6 +85,7 @@ function endTests() {
 			totalTestErrors += testError
 			message = ""+testErrors + " tests failed."
 		}
+		totalTestCount   += testCount
 		totalTestCounter += testCounter
 		diag("Ran "+testCounter+" of "+testCount+" tests. " + message)
 		
