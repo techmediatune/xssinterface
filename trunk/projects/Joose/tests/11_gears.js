@@ -1,4 +1,4 @@
-initializeTests()
+plan(2)
 	
 
 
@@ -14,6 +14,7 @@ Class("HardWork", {
 	methods: {
 		onDoWork: function (result) {
 			ok(result == 1001, "Gear Worker returns correct result")
+			endTests()
 		}
 	},
 	workers: {
@@ -31,5 +32,3 @@ var gt = new HardWork();
 ok(gt.data, "Data member is here")
 
 gt.doWork(1)
-
-endTests()

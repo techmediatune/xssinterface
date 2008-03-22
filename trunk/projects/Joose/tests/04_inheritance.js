@@ -1,4 +1,4 @@
-initializeTests()
+plan(5)
 
 diag("Inheritance");
 	

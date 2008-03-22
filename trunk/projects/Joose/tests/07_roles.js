@@ -1,4 +1,4 @@
-initializeTests()
+plan(7)
 
 diag("Roles")
 

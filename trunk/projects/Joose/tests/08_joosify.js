@@ -1,4 +1,4 @@
-initializeTests()
+plan(9)
 
 diag("joosify");
 
