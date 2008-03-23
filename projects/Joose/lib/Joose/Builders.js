@@ -116,8 +116,8 @@ Joose.Builders = {
 	},
 	
 	classMethods: function (map) {
-		map.each(function (func, name) {
-			joose.cc.meta.addMethodObject(new Joose.ClassMethod(name, func))
+		map.each(function (func, name2) {
+			joose.cc.meta.addMethodObject(new Joose.ClassMethod(name2, func))
 		})
 	},
 	

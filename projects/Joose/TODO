@@ -6,7 +6,6 @@ Tests
 Features
 - implement class versioning
 - autodetect and use equivalents of methods in EvilObjectExtension.js of frameworks such as prototype.js, dojo and jquery.
-- make this work in IE :)
 - Add something to register Namespaces
 - Make all builders accept strings instead of class objects, too, so you dont have to remember what to pass
 - Implement auto loading of Joose.* classes
@@ -17,3 +16,4 @@ Refactoring:
 
 Done:
 - execute every test file in its own iframe
+- make this work in IE :)
