@@ -1,4 +1,4 @@
-plan(23)
+plan(27)
 
 diag("Testing Storage Role")
 
@@ -46,6 +46,13 @@ Class("Geometry.Rectangle", {
 
 fail(function () {Geometry.Rectangle.unpack(o)}, "Storage data is of wrong type", "Unpacking a point into a rectangle fails")
 fail(function () {Geometry.Rectangle.unpack({width: 10, height: 20})}, "Serialized data needs to include a __CLASS__ attribute.", "Unpacking without __CLASS__ attribute fails correctly.")
+
+var rect = new Geometry.Rectangle({width: 100, height: 200});
+ok(rect.getWidth() == 100, "We can make Rectangles");
+var packed = rect.pack();
+ok(packed.__CLASS__ == "Geometry::Rectangle", "We are using :: as the Namespace separator")
+ok(Geometry.Rectangle.unpack, "Rectangles have unpack");
+ok(Geometry.Rectangle.unpack(packed).meta.className() == "Geometry.Rectangle", "And we can convert is back to the dot in JavaScript")
 
 var before = {
 	test: [new Point({x: 10, y: 20})],
