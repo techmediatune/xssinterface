@@ -13,6 +13,21 @@ function nofail(func, msg) {
 	}
 }
 
+function fail(func, errorMsgPart, msg) {
+	try {
+		func()
+	} catch(e) {
+		if(e.indexOf(errorMsgPart != -1)) {
+			ok(true, msg)
+			return
+		} else {
+			ok(false, msg + " [Wrong error: "+e+"]")
+			return
+		}
+	}
+	ok(false, msg + " [No error]")
+}
+
 
 function plan(count) {
 	testCount   = count

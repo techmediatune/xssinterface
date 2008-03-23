@@ -131,6 +131,20 @@ Joose.MetaClassBootstrap.prototype = {
 		return this.c
 	},
 	
+	classNameToClassObject: function (className) {
+		var top    = joose.top;
+		var parts  = className.split(".");
+		var object = top;
+		for(var i = 0; i < parts.length; i++) {
+			var part = parts[i];
+			object   = object[part];
+			if(!object) {
+				throw "Unable to find class "+className
+			}
+		}
+		return object
+	},
+	
 	addNonJooseSuperClass: function (name, object) {
 		
 		var pseudoMeta  = new Joose.MetaClassBootstrap();
