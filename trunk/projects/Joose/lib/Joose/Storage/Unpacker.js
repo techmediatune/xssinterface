@@ -5,13 +5,20 @@ Class("Joose.Storage.Unpacker", {
 			if(!name) {
 				throw("Serialized data needs to include a __CLASS__ attribute.")
 			}
-			var parts  = name.split("::");
-			var jsName = parts.join(".");
+			var jsName = this.packedClassNameToJSClassName(name)
 			
 			var co = this.meta.classNameToClassObject(jsName);
 			
 			return co.unpack(data)
 		},
+		
+		// Format My::Class::Name-0.01 We ignore the version
+		packedClassNameToJSClassName: function (packed) { 
+			var parts  = packed.split("-");
+			parts      = parts[0].split("::");
+			return parts.join(".");
+		},
+		
 		jsonParseFilter: function (key, value) {
 			if(typeof value == "object" && value.__CLASS__) {
 				return Joose.Storage.Unpacker.unpack(value)

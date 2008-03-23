@@ -30,9 +30,9 @@ Class("Joose.Storage", {
 			var seenClass = false;
 			data.each(function (value,name) {
 				if(name == "__CLASS__") {
-					var className = me.packedClassName()
-					if(value != className) {
-						throw "Storage data is of wrong type "+value+". I am "+className+"."
+					var className = Joose.Storage.Unpacker.packedClassNameToJSClassName(value)
+					if(className != me.meta.className()) {
+						throw "Storage data is of wrong type "+className+". I am "+me.meta.className()+"."
 					}
 					seenClass = true
 					return
