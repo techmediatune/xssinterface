@@ -5,6 +5,20 @@ Joose = function () {
 };
 
 Joose.prototype = {
+	
+	/*
+	 * Differentiates between instances and classes
+	 */
+	isInstance: function(obj) {
+		if(!obj.meta) {
+			throw "isInstance only works with Joose objects and classes."
+		}
+		if(obj.constructor === obj.meta.c) {
+			return true
+		}
+		return false
+	},
+	
 	init: function () {
 		Joose.Builders.each(function (func, name) {
 			joose.top[name] = func
@@ -146,7 +160,7 @@ Joose.MetaClassBootstrap.prototype = {
 	
 	addRole: function (roleClass) {
 		this.roles.push(roleClass);
-		roleClass.meta.exportTo(this.getClassObject())
+		roleClass.meta.apply(this.getClassObject())
 	},
 	
 	getClassObject: function () {

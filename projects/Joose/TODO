@@ -9,6 +9,7 @@ Features
 - Add something to register Namespaces
 - Make all builders accept strings instead of class objects, too, so you dont have to remember what to pass
 - Implement auto loading of Joose.* classes
+- Add an interface to Joose.Class to ask for instance vs. class methods
 
 Refactoring:
 - Remove Class("MyClass");has("bla");methods({}) - style syntax from Joose and test suite

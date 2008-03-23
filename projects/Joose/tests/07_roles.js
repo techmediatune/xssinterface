@@ -1,4 +1,4 @@
-plan(7)
+plan(13)
 
 diag("Roles")
 
@@ -42,5 +42,21 @@ ok(!a.isEqual(c), "Equality works for unequal things")
 
 ok(a.notEqual(c), "Role composition works and notEqual works")
 ok(!a.notEqual(b), "Role composition works and notEqual works for equal things")
+
+Class("RuntimeRole", {
+	meta: Joose.Role,
+	methods: {
+		appliedAtRuntime: function () { return true }
+	}
+})
+
+RuntimeRole.meta.apply(a);
+ok(a.appliedAtRuntime, "object got method from runtime role")
+ok(a.appliedAtRuntime(), "object can call method");
+ok(!b.appliedAtRuntime, "other object does not have it");
+ok(!new Currency(2).appliedAtRuntime, "New object do not have it either")
+ok(a.meta.className() != "Currency", "a is no longer of exact type Currency");
+ok(a.meta.isa(Currency), "but a is still a currency")
+
 
 endTests()

@@ -13,7 +13,7 @@ Class("Joose.Class", {
   			this.c.apply(obj, arguments);
   			return obj;
 		},
-	
+		
 		can: function (methodName) {
 			return this.methodNames.exists(methodName)
 		},
