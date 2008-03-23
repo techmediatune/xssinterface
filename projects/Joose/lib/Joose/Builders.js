@@ -35,7 +35,7 @@ Joose.Builders = {
 					if(root[parts[i]] == null) {
 						root[parts[i]] = {};
 					}
-					root = root[parts[i]]
+					root = root[parts[i]];
 				}
 				root[parts[parts.length - 1]] = c
 			}
