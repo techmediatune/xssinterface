@@ -4,6 +4,6 @@ Class("Joose.ClassMethod", {
 		isClassMethod: function () { return true },
 		addToClass: function (c) {
 			c[this.getName()] = this.asFunction()
-		},
+		}
 	}
 })
