@@ -1,4 +1,4 @@
-plan(19)
+plan(25)
 	
 diag("MetaClass");
 	
@@ -63,5 +63,12 @@ var o4 = new TestClass({
 
 ok(o4.test == "newVal", "Initializer works");
 ok(o4.another == "fooBar", "Initializer works for another parameter")
+
+ok(joose.isInstance(o4), "joose.isInstance recognizes instances")
+ok(joose.isInstance(o3), "joose.isInstance recognizes instances")
+ok(joose.isInstance(new TestClass()), "joose.isInstance recognizes instances")
+ok(!joose.isInstance(TestClass), "joose.isInstance recognizes classes")
+ok(!joose.isInstance(TestClass2), "joose.isInstance recognizes classes")
+fail(function () { joose.isInstance({}) }, "isInstance only works with Joose objects and classes.", "joose.isInstance fails for generic objects")
 
 endTests()

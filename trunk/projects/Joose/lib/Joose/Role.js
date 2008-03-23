@@ -1,3 +1,4 @@
+
 /*
  * An Implementation of Traits
  * see http://www.iam.unibe.ch/~scg/cgi-bin/scgbib.cgi?query=nathanael+traits+composable+units+ecoop
@@ -14,9 +15,26 @@ Class("Joose.Role", {
 		addRequirement: function (methodName) {
 			this.requiresMethodNames.push(methodName)
 		},
+		
+		
 	
-		exportTo: function (classObject) {
-			classObject.meta.importMethods(this.getClassObject())
+		apply: function (object) {
+			
+			if(joose.isInstance(object)) {
+				// Create an anonymous subclass ob object's class
+				var meta = object.meta;
+				var c    = meta.createClass(meta.className()+"AnonymousSubclass"+Joose.Role.anonymousClassCounter);
+				c.meta.addSuperClass(object.meta.getClassObject());
+				// appy the role to the anonymous class
+				c.meta.addRole(this.getClassObject())
+				// swap meta class of object with new instance
+				object.meta      = c.meta;
+				// swap __proto__ chain of object to its new class
+				object.__proto__ = c.prototype
+			} else {
+				// object is actually a class
+				object.meta.importMethods(this.getClassObject())
+			}
 		},
 	
 		hasRequiredMethods: function (classObject) {
@@ -41,3 +59,5 @@ Class("Joose.Role", {
 		}
 	}
 })
+
+Joose.Role.anonymousClassCounter = 0;
