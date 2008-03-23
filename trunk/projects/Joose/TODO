@@ -1,0 +1,17 @@
+Tests
+- Add many more tests
+- Add tests that include and use frameworks such as prototype.js, dojo or jquery.
+- refactor tests into sub directories
+- execute every test file in its own iframe
+
+Features
+- implement class versioning
+- autodetect and use equivalents of methods in EvilObjectExtension.js of frameworks such as prototype.js, dojo and jquery.
+- make this work in IE :)
+- Add something to register Namespaces
+- Make all builders accept strings instead of class objects, too, so you dont have to remember what to pass
+- Implement auto loading of Joose.* classes
+
+Refactoring:
+- Remove Class("MyClass");has("bla");methods({}) - style syntax from Joose and test suite
+- Implement Joose.Builders so that they dont clutter the top level name space
