@@ -2,7 +2,6 @@ Tests
 - Add many more tests
 - Add tests that include and use frameworks such as prototype.js, dojo or jquery.
 - refactor tests into sub directories
-- execute every test file in its own iframe
 
 Features
 - implement class versioning
@@ -15,3 +14,6 @@ Features
 Refactoring:
 - Remove Class("MyClass");has("bla");methods({}) - style syntax from Joose and test suite
 - Implement Joose.Builders so that they dont clutter the top level name space
+
+Done:
+- execute every test file in its own iframe

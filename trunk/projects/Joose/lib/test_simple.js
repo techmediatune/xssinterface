@@ -107,6 +107,16 @@ function endTests() {
 	}
 }
 
+function runTestFile(url) {
+	
+	var html = '<h2>Testfile: '+url+'</h2><iframe width=100% height=200 src="test_runner.html?'+url+'"></iframe>'
+	
+	var div = document.createElement("div");
+	div.className = "test"
+	div.innerHTML = html;
+	document.body.appendChild(div)
+}
+
 function doTestFile(url) {
 	
 	/*var script = new Joose.SimpleRequest().getText(url);
