@@ -1,6 +1,20 @@
 plan(5)
 
 diag("Inheritance");
+
+Class("TestClass");
+	
+method("hello", function () {
+	return "world"
+})
+methods({
+	one: function () { return 1 },
+	two: function () { return 2 },
+	identity: function (para) { return para },
+	identity2: function (para1, para2) { return para2 }
+})
+
+Class("TestClass2", {})
 	
 Class("Subclass");
 	

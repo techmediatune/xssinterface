@@ -7,37 +7,32 @@
 <script type="text/javascript" src="../lib/test_simple.js"></script>
 <script type="text/javascript" src="../lib/EvilObjectExtension.js"></script>
 <script type="text/javascript" src="../lib/Joose.js"></script>
-<script type="text/javascript" src="../lib/Joose/Builders.js"></script>
-<script type="text/javascript" src="../lib/Joose/Class.js"></script>
-<script type="text/javascript" src="../lib/Joose/ClassMethod.js"></script>
-<script type="text/javascript" src="../lib/Joose/Role.js"></script>
-<script type="text/javascript" src="../lib/Joose/Method.js"></script>
-<script type="text/javascript" src="../lib/Joose/SimpleRequest.js"></script>
-<script type="text/javascript" src="../lib/Joose/Gears.js"></script>
-<script type="text/javascript" src="../lib/Joose/Storage.js"></script>
-<script type="text/javascript" src="../lib/Joose/Storage/Unpacker.js"></script>
+<script type="text/javascript">
+joose.loadComponents("../lib")
+</script>
 <script type="text/javascript" src="json2.js"></script>
+<link href="test.css" rel="stylesheet" type="text/css" />
 
 
 </head>
 
-<body onload="window.setTimeout(function () {testReport()}, 100)">
+<body>
 
 <div id="testLog"></div>
 
 <script type="text/javascript">
-doTestFile("01_sanity.js")
-doTestFile("02_classcreation.js")
-doTestFile("03_methods.js")
-doTestFile("04_inheritance.js")
-doTestFile("05_metaclass_extension.js")
-doTestFile("06_basic_examples.js")
-doTestFile("07_roles.js")
-doTestFile("08_joosify.js")
-doTestFile("09_js_style_building.js")
-doTestFile("10_method_wrappers.js")
-doTestFile("11_gears.js")
-doTestFile("12_storage.js")
+runTestFile("01_sanity.js")
+runTestFile("02_classcreation.js")
+runTestFile("03_methods.js")
+runTestFile("04_inheritance.js")
+runTestFile("05_metaclass_extension.js")
+runTestFile("06_basic_examples.js")
+runTestFile("07_roles.js")
+runTestFile("08_joosify.js")
+runTestFile("09_js_style_building.js")
+runTestFile("10_method_wrappers.js")
+runTestFile("11_gears.js")
+runTestFile("12_storage.js")
 </script>
 
 </body>

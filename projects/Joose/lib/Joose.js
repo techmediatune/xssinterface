@@ -9,6 +9,28 @@ Joose.prototype = {
 		Joose.Builders.each(function (func, name) {
 			joose.top[name] = func
 		});
+	},
+	components: function () {
+		return [
+			"Joose.Builders",
+			"Joose.Class",
+			"Joose.Method",
+			"Joose.ClassMethod",
+			"Joose.Role",
+			"Joose.Method",
+			"Joose.SimpleRequest",
+			"Joose.Gears",
+			"Joose.Storage",
+			"Joose.Storage.Unpacker"
+		]
+	},
+	loadComponents: function (basePath) {
+		var html = "";
+		this.components().each(function (name) {
+			var url    = ""+basePath + "/" + name.split(".").join("/") + ".js";
+			html += '<script type="text/javascript" src="'+url+'"></script>'
+		})
+		document.write(html)
 	}
 }
 

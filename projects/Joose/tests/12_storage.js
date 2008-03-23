@@ -91,3 +91,4 @@ ok(fromMoose.meta.className() == "Geometry.Point", "p is of correct type");
 
 diag("JSON version of the Moose-JSON-Input: "+JSON.stringify(fromMoose));
 
+endTests()

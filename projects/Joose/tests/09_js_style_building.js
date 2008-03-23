@@ -1,5 +1,14 @@
 plan(6)
 
+Class("Eq", {meta: Joose.Role});
+requires("isEqual");
+
+methods({
+	notEqual: function (para) {
+		return !this.isEqual(para)
+	}
+})
+
 diag("Alternative Building")
 
 Class("Currency2", {
