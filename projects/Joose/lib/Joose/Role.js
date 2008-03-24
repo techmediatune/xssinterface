@@ -2,11 +2,18 @@
 /*
  * An Implementation of Traits
  * see http://www.iam.unibe.ch/~scg/cgi-bin/scgbib.cgi?query=nathanael+traits+composable+units+ecoop
+ * 
+ * Current Composition rules:
+ * - At compile time we override existing (at the time of rule application) methods
+ * - At runtime we dont
  */
 Class("Joose.Role", {
 	isa: Joose.Class,
 	has: ["requiresMethodNames"],
 	methods: {
+		
+		addInitializer: Joose.emptyFunction,
+		
 		initialize: function () {
 			this._name               = "Joose.Role"
 			this.requiresMethodNames = [];
@@ -23,14 +30,21 @@ Class("Joose.Role", {
 			if(joose.isInstance(object)) {
 				// Create an anonymous subclass ob object's class
 				var meta = object.meta;
-				var c    = meta.createClass(meta.className()+"AnonymousSubclass"+Joose.Role.anonymousClassCounter);
+				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Role.anonymousClassCounter);
 				c.meta.addSuperClass(object.meta.getClassObject());
 				// appy the role to the anonymous class
 				c.meta.addRole(this.getClassObject())
 				// swap meta class of object with new instance
 				object.meta      = c.meta;
 				// swap __proto__ chain of object to its new class
-				object.__proto__ = c.prototype
+				// unfortunately this is not available in IE :(
+				// object.__proto__ = c.prototype
+				// Workaround for IE:
+				for(var i in c.prototype) {
+					if(object[i] == null) {
+						object[i] = c.prototype[i]
+					}
+				}
 			} else {
 				// object is actually a class
 				object.meta.importMethods(this.getClassObject())

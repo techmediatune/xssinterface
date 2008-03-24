@@ -159,7 +159,12 @@ Joose.Builders = {
 		}) 
 	},
 	
-	rw: "rw",
+	decorates: function(map) {
+		map.each(function (classObject, attributeName) {
+			joose.cc.meta.decorate(classObject, attributeName)
+		}) 
+	},
+		rw: "rw",
 	ro: "ro"
 	 
 };
