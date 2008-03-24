@@ -1,3 +1,7 @@
+Joose is an meta object protocol implementation for JavaScript inspired
+by Moose: http://www.iinteractive.com/moose/
+
 This is experimental development code!
 
-Run tests/test.html in your web broser.
+To try out Joose run the test suite at:
+http://it.test.avantaxx.de/xssinterface/projects/Joose/tests/test.html

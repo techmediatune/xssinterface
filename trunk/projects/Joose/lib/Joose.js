@@ -18,6 +18,7 @@ Joose.prototype = {
 		}
 		return false
 	},
+
 	
 	init: function () {
 		Joose.Builders.each(function (func, name) {
@@ -30,12 +31,13 @@ Joose.prototype = {
 			"Joose.Class",
 			"Joose.Method",
 			"Joose.ClassMethod",
-			"Joose.Role",
 			"Joose.Method",
+			"Joose.Role",
 			"Joose.SimpleRequest",
 			"Joose.Gears",
 			"Joose.Storage",
-			"Joose.Storage.Unpacker"
+			"Joose.Storage.Unpacker",
+			"Joose.Decorator"
 		]
 	},
 	loadComponents: function (basePath) {
@@ -138,10 +140,14 @@ Joose.MetaClassBootstrap.prototype = {
 		}
 		meta.c = c;
 		
-		if(!c.prototype.initialize) {
-			meta.addMethod("initialize", this.initializer())
-		}
+		meta.addInitializer()
 		return c;
+	},
+	
+	addInitializer: function () {
+		if(!this.c.prototype.initialize) {
+			this.addMethod("initialize", this.initializer())
+		}
 	},
 	
 	initializer: function () {
@@ -304,6 +310,16 @@ Joose.MetaClassBootstrap.prototype = {
 	
 	getAttributeNames: function () {
 		return this.attributeNames;
+	},
+	
+	getInstanceMethods: function () {
+		var a = [];
+		this.methods.each(function (m) {
+			if(!m.isClassMethod()) {
+				a.push(m)
+			}
+		})
+		return a
 	},
 	
 	getMethodNames:	function () {

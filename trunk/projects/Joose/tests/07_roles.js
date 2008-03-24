@@ -1,4 +1,4 @@
-plan(13)
+plan(16)
 
 diag("Roles")
 
@@ -15,26 +15,27 @@ methods({
 	}
 })
 
-Class("Currency");
-does(Eq)
-has("value", {is: rw})
+Class("Currency", {
+	does: Eq,
+	has: {value: {is: rw}},
 
-methods({
-	
-	initialize: function (value) {
-		this.setValue(value)
-	},
-	
-	isEqual: function (cur) {
-		return this.getValue() == cur.getValue()
+	methods: {
+		
+		isEqual: function (cur) {
+			return this.getValue() == cur.getValue()
+		}	
 	}
 })
 
 check()
 
-var a = new Currency(1);
-var b = new Currency(1);
-var c = new Currency(2);
+var a = new Currency({value: 1});
+var b = new Currency({value: 1});
+var c = new Currency({value: 2});
+
+ok(a.getValue() == 1, "Value set correctly")
+ok(b.getValue() == 1, "Value set correctly")
+ok(c.getValue() == 2, "Value set correctly")
 
 ok(a.isEqual(b), "Equality works")
 ok(b.isEqual(a), "Equality works in both directions")
@@ -55,7 +56,7 @@ ok(a.appliedAtRuntime, "object got method from runtime role")
 ok(a.appliedAtRuntime(), "object can call method");
 ok(!b.appliedAtRuntime, "other object does not have it");
 ok(!new Currency(2).appliedAtRuntime, "New object do not have it either")
-ok(a.meta.className() != "Currency", "a is no longer of exact type Currency");
+ok(a.meta.className() != "Currency", "a is no longer of exact type Currency: "+a.meta.className());
 ok(a.meta.isa(Currency), "but a is still a currency")
 
 

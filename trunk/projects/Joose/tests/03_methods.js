@@ -29,7 +29,8 @@ ok(o.one.meta.meta.isa(Joose.Method), "Methods of Joose.Classes are Joose.Method
 
 Class("MoreMethods", {
 	methods: {
-		one: function () { return 1 }
+		one: function () { return 1 },
+		two: function () { return 2 }
 	},
 	classMethods: {
 		getName: function () { return "Joose" }
@@ -45,6 +46,9 @@ var m = new MoreMethods();
 ok(m.one() == 1, "Can still call instance methods")
 ok(!m.getName, "No class method in the instance")
 ok(m.constructor.getName() == "Joose", "Can call the class method on the constructor")
+
+// one, two, initialize
+ok(m.meta.getInstanceMethods().length == 3, "Correct number of instance methods")
 
 
 endTests()
