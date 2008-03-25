@@ -1,3 +1,9 @@
+/*
+ * Joose moved to a different Repository
+ * - SVN-URL: http://code2.0beta.co.uk/moose/svn/
+ *   - Repository: Joose
+ */
+
 Joose = function () {
 	this.cc   = null;  // the current class
 	this.top  = window;
@@ -371,7 +377,7 @@ Joose.Method.prototype = {
 
 Joose.bootstrap()
 
-
+Joose.Class.anonymousClassCounter = 0;
 
 
 
