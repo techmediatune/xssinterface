@@ -30,7 +30,7 @@ Class("Joose.Role", {
 			if(joose.isInstance(object)) {
 				// Create an anonymous subclass ob object's class
 				var meta = object.meta;
-				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Role.anonymousClassCounter);
+				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Class.anonymousClassCounter);
 				c.meta.addSuperClass(object.meta.getClassObject());
 				// appy the role to the anonymous class
 				c.meta.addRole(this.getClassObject())
@@ -74,4 +74,3 @@ Class("Joose.Role", {
 	}
 })
 
-Joose.Role.anonymousClassCounter = 0;
