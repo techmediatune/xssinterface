@@ -1,3 +1,8 @@
+/*
+ * A class for methods
+ * Originally defined in Joose.js
+ */
+
 Class("Joose.Method", {
 	methods: {
 		
@@ -11,7 +16,7 @@ Class("Joose.Method", {
 			return this._makeWrapped(function () {
 				var me = this;
 				var bound = function () { return orig.apply(me, arguments) }
-				return func.apply(this, [bound].pushArray(arguments))
+				return func.apply(this, Joose.A.concat([bound], arguments))
 			})			
 		},
 		before: function (func) {

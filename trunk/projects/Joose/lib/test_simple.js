@@ -1,3 +1,9 @@
+if(window.$ == null) {
+	function $(id) {
+		return document.getElementById(id)
+	}
+}
+
 
 var totalTestCounter = 0;
 var totalTestErrors  = 0;
@@ -17,11 +23,12 @@ function fail(func, errorMsgPart, msg) {
 	try {
 		func()
 	} catch(e) {
-		if(e.indexOf(errorMsgPart != -1)) {
+		var ex = new String(e);
+		if(ex.indexOf(errorMsgPart) != -1) {
 			ok(true, msg)
 			return
 		} else {
-			ok(false, msg + " [Wrong error: "+e+"]")
+			ok(false, msg + " [Wrong error: "+ex+"]")
 			return
 		}
 	}
@@ -58,7 +65,7 @@ function ok(bool, msg) {
 }
 
 function dump(o) {
-	o.each(function(value,name) {
+	Joose.O.each(o, function(value,name) {
 		say("<pre>"+name+" -> "+value+"</pre>")
 	})
 }
@@ -99,6 +106,17 @@ function endTests() {
 		if(testErrors > 0) {
 			totalTestErrors += testErrors
 			message = ""+testErrors + " tests failed."
+			
+			if(window.parent) {
+				window.parent.document.body.style.backgroundColor = "red"
+			}
+		} else {
+			
+			if(window.parent) {
+				if(window.parent.document.body.style.backgroundColor != "red") {
+					window.parent.document.body.style.backgroundColor = "green"
+				}
+			}
 		}
 		totalTestCount   += testCount
 		totalTestCounter += testCounter

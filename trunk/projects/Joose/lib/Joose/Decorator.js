@@ -3,7 +3,7 @@ Class("Joose.Decorator", {
 	methods: {
 		decorate: function (classObject, attributeName) {
 			var me = this;
-			classObject.meta.getInstanceMethods().each(function (m) {
+			Joose.A.each(classObject.meta.getInstanceMethods(), function (m) {
 				var name    = m.getName();
 				var argName = attributeName;
 				// only override non existing methods

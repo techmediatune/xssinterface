@@ -34,7 +34,7 @@ Class("Joose.Gears", {
 		
 		addWorker:		 function (name, func, props) {
 			
-			var cbName  = "on"+name.uppercaseFirst()
+			var cbName  = "on"+Joose.S.uppercaseFirst(name)
 			
 			// No gears, then work inline
 			if(!this.canGears()) {

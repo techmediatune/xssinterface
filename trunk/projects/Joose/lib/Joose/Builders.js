@@ -1,12 +1,18 @@
 Joose.Builders = {
+	Module: function (name, functionThatCreateClassesAndRoles) {
+		Joose.Module.setup(name, functionThatCreateClassesAndRoles)
+	},
 	Class:	function (name, props) {
 		
 		var c = null;
 		
 		if(name) {
+			var className  = name;
+			if(joose.currentModule) {
+				className  = joose.currentModule.getName() + "." + name
+			}
 			var root       = joose.top;
-			var nameString = new String(name);
-			var parts      = nameString.split(".")
+			var parts      = className.split(".")
 		
 			for(var i = 0; i < parts.length; i++) {
 				root = root[parts[i]]
@@ -26,10 +32,13 @@ Joose.Builders = {
 			
 			var aClass      = new metaClass();
 
-			var c           = aClass.createClass(name)
-			if(name) {
+			var c           = aClass.createClass(name, null, joose.currentModule)
+			
+			var className   = c.meta.className()
+			
+			if(name && className) {
 				var root = joose.top;
-				var n = new String(name);
+				var n = new String(className);
 				var parts = n.split(".");
 				for(var i = 0; i < parts.length - 1; i++) {
 					if(root[parts[i]] == null) {
@@ -43,7 +52,7 @@ Joose.Builders = {
 		}
 		joose.cc = c;
 		if(props) {
-			props.each(function (value, name) { 
+			Joose.O.each(props, function (value, name) { 
 				var builder = Joose.Builders[name];
 				if(!builder) {
 					throw "Called invalid builder "+name+" while creating class "+c.meta.name
@@ -58,18 +67,27 @@ Joose.Builders = {
 	},
 	
 	joosify: function (standardClassName, standardClassObject) {
-		var c    = standardClassObject;
+		var c         = standardClassObject;
 		var metaClass = new Joose.Class();
-		c        = metaClass.createClass(standardClassName, c)
+		
+		c.toString = function () { return this.meta.className() }
+		c             = metaClass.createClass(standardClassName, c)
 	
 		var meta = c.meta;
 	
 		for(var name in standardClassObject.prototype) {
-			var value = c.prototype[name]
+			if(name == "meta") {
+				continue
+			}
+			var value = standardClassObject.prototype[name]
 			if(typeof(value) == "function") {
 				meta.addMethod(name, value)
 			} else {
-				meta.addAttribute(name, {init: value})
+				var props = {};
+				if(typeof(value) != "undefined") {
+					props.init = value
+				}
+				meta.addAttribute(name, props)
 			}
 		}
 	},
@@ -99,7 +117,7 @@ Joose.Builders = {
 			var props = arguments[1];
 			joose.cc.meta.addAttribute(name, props)
 		} else { // name is a map
-			map.each(function (props, name) {
+			Joose.O.each(map, function (props, name) {
 				joose.cc.meta.addAttribute(name, props)
 			})
 		}
@@ -110,49 +128,49 @@ Joose.Builders = {
 	},
 	
 	methods: function (map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.addMethod(name, func)
 		})
 	},
 	
 	classMethods: function (map) {
-		map.each(function (func, name2) {
+		Joose.O.each(map, function (func, name2) {
 			joose.cc.meta.addMethodObject(new Joose.ClassMethod(name2, func))
 		})
 	},
 	
 	workers: function (map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.addWorker(name, func)
 		})
 	},
 	
 	before: function(map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.wrapMethod(name, "before", func);
 		}) 
 	},
 	
 	after: function(map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.wrapMethod(name, "after", func);
 		}) 
 	},
 	
 	around: function(map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.wrapMethod(name, "around", func);
 		}) 
 	},
 	
 	override: function(map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.wrapMethod(name, "override", func);
 		}) 
 	},
 	
 	augment: function(map) {
-		map.each(function (func, name) {
+		Joose.O.each(map, function (func, name) {
 			joose.cc.meta.wrapMethod(name, "augment", func, function () {
 				joose.cc.meta.addMethod(name, func)
 			});
@@ -160,7 +178,7 @@ Joose.Builders = {
 	},
 	
 	decorates: function(map) {
-		map.each(function (classObject, attributeName) {
+		Joose.O.each(map, function (classObject, attributeName) {
 			joose.cc.meta.decorate(classObject, attributeName)
 		}) 
 	},
