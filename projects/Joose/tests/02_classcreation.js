@@ -1,4 +1,4 @@
-plan(25)
+plan(28)
 	
 diag("MetaClass");
 	
@@ -15,12 +15,18 @@ var o = new TestClass();
 ok(o, "We made an object");
 	
 has("test", {is: rw, init: 1});
+
+diag("Attributes")
 	
 o = new TestClass();
-	
+
 ok(o.test == 1, "We have an attribute")
 o.test = 2;
 ok(o.test == 2, "We can set attributes")
+ok(o.meta.getAttribute, "There is a getAttribute method")
+var at = o.meta.getAttribute("test")
+ok(at, "Attribute object exists");
+ok(at.getName() == "test", "The attributes name is correct")
 	
 diag("Multiple Classes")
 	

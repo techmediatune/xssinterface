@@ -13,7 +13,7 @@ diag("Alternative Building")
 
 Class("Currency2", {
 	does: Eq,
-	has:  ["value", {is: rw}],
+	has:  ["_value", {is: rw}],
 	methods: {
 		initialize: function (value) {
 			this.setValue(value)

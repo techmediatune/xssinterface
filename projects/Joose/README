@@ -1,12 +1,8 @@
-Joose moved to a different Repository
-- SVN-URL: http://code2.0beta.co.uk/moose/svn/
-  - Repository: Joose
-
-
 Joose is an meta object protocol implementation for JavaScript inspired
 by Moose: http://www.iinteractive.com/moose/
 
 This is experimental development code!
 
 To try out Joose run the test suite at:
+tests/test.html or
 http://it.test.avantaxx.de/xssinterface/projects/Joose/tests/test.html

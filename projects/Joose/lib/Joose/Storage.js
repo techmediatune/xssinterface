@@ -11,7 +11,7 @@ Class("Joose.Storage", {
 				__CLASS__: this.packedClassName()
 			};
 			var me = this;
-			this.meta.attributeNames.each(function (name) {
+			Joose.A.each(this.meta.attributeNames, function (name) {
 				o[name] = me[name]
 			})
 			return o
@@ -28,7 +28,7 @@ Class("Joose.Storage", {
 		unpack: function (data) {
 			var me = this.meta.instantiate();
 			var seenClass = false;
-			data.each(function (value,name) {
+			Joose.O.each(data, function (value,name) {
 				if(name == "__CLASS__") {
 					var className = Joose.Storage.Unpacker.packedClassNameToJSClassName(value)
 					if(className != me.meta.className()) {

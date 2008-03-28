@@ -14,6 +14,18 @@ Class("Joose.Role", {
 		
 		addInitializer: Joose.emptyFunction,
 		
+		defaultClassFunctionBody: function () {
+			var f = function () {
+				throw "Roles may not be instantiated."
+			};
+			f.toString = function () { return this.meta.className() }
+			return f
+		},
+		
+		addSuperClass: function () {
+			throw "Roles may not inherit"
+		},
+		
 		initialize: function () {
 			this._name               = "Joose.Role"
 			this.requiresMethodNames = [];
@@ -22,15 +34,13 @@ Class("Joose.Role", {
 		addRequirement: function (methodName) {
 			this.requiresMethodNames.push(methodName)
 		},
-		
-		
 	
 		apply: function (object) {
 			
 			if(joose.isInstance(object)) {
 				// Create an anonymous subclass ob object's class
 				var meta = object.meta;
-				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Class.anonymousClassCounter);
+				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Role.anonymousClassCounter);
 				c.meta.addSuperClass(object.meta.getClassObject());
 				// appy the role to the anonymous class
 				c.meta.addRole(this.getClassObject())
@@ -47,13 +57,21 @@ Class("Joose.Role", {
 				}
 			} else {
 				// object is actually a class
-				object.meta.importMethods(this.getClassObject())
+				var me    = this;
+				var names = this.getMethodNames();
+		
+				//alert("Super"+me.name + " -> "+classObject.meta.name +"->" + names)
+		
+				Joose.A.each(names, function (name) {
+					var m = me.dispatch(name);
+					object.meta.addMethodObject(m.meta)
+				})
 			}
 		},
 	
 		hasRequiredMethods: function (classObject) {
 			var complete = true
-			this.requiresMethodNames.each(function (value) {
+			Joose.A.each(this.requiresMethodNames, function (value) {
 				var found = classObject.meta.can(value)
 				if(!found) {
 					complete = false
@@ -65,7 +83,6 @@ Class("Joose.Role", {
 		isImplementedBy: function (classObject) {
 		
 			var complete = this.hasRequiredMethods(classObject);
-	
 			if(complete) {
 				complete = this.implementsMyMethods(classObject);
 			}
@@ -74,3 +91,4 @@ Class("Joose.Role", {
 	}
 })
 
+Joose.Role.anonymousClassCounter = 0;

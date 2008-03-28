@@ -15,7 +15,7 @@ Class("Joose.Class", {
 		},
 		
 		can: function (methodName) {
-			return this.methodNames.exists(methodName)
+			return Joose.A.exists(this.methodNames, methodName)
 		},
 	
 		does: function (classObject) {
@@ -24,7 +24,7 @@ Class("Joose.Class", {
 	
 		implementsMyMethods: function (classObject) {
 			var complete = true
-			this.getMethodNames().each(function (value) {
+			Joose.A.each(this.getMethodNames(), function (value) {
 				var found = classObject.meta.can(value)
 				if(!found) {
 					complete = false
@@ -37,7 +37,7 @@ Class("Joose.Class", {
 		validateClass: function () {
 			var c  = this.getClassObject();
 			var me = this;
-			this.roles.each(function(role) {
+			Joose.A.each(this.roles, function(role) {
 				if(!role.meta.isImplementedBy(c)) {
 					throw("Class "+me.className()+" does not fully implement the role "+role.meta.className())
 				}

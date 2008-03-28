@@ -1,4 +1,4 @@
-plan(12)
+plan(13)
 	
 
 diag("Methods");
@@ -48,7 +48,7 @@ ok(!m.getName, "No class method in the instance")
 ok(m.constructor.getName() == "Joose", "Can call the class method on the constructor")
 
 // one, two, initialize
-ok(m.meta.getInstanceMethods().length == 3, "Correct number of instance methods")
+ok(m.meta.getInstanceMethods().length == 4, "Correct number of instance methods")
 
 
 endTests()
