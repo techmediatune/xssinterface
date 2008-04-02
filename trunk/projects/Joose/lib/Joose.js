@@ -3,6 +3,8 @@ Joose = function () {
 	this.currentModule   = null
 	this.top             = window;
 	this.globalObjects   = [];
+	
+	this.anonymouseClassCounter = 0;
 };
 
 
@@ -42,6 +44,13 @@ Joose.S.uppercaseFirst = function (string) {
 	return first + rest;
 }
 
+Joose.S.isString = function (thing) { 
+	if(typeof thing == "string") {
+		return true
+	}
+	return false
+}
+
 Joose.O = {};
 Joose.O.each = function (object, func) {
 	for(var i in object) {
@@ -66,13 +75,12 @@ Joose.prototype = {
 
 	
 	init: function () {
-		Joose.O.each(Joose.Builders, function (func, name) {
-			joose.top[name] = func
-		});
+		this.builder = new Joose.Builder();
+		this.builder.globalize()
 	},
 	components: function () {
 		return [
-			"Joose.Builders",
+			"Joose.Builder",
 			"Joose.Class",
 			"Joose.Method",
 			"Joose.ClassMethod",
@@ -132,10 +140,18 @@ Joose.bootstrap = function () {
 
 Joose.bootstrap2 = function () {
 	// Turn Joose.Method into a Joose.Class object
-	Joose.Builders.joosify("Joose.Method", Joose.Method)
-	Joose.Builders.joosify("Joose.Attribute", Joose.Attribute)
+	Joose.Builder.Builders.joosify("Joose.Method", Joose.Method)
+	Joose.Builder.Builders.joosify("Joose.Attribute", Joose.Attribute)
 }
 
+/**
+ * @name Joose.Class
+ * @constructor
+ */
+/*
+ * Joose.MetaClassBootstrap is used to bootstrap the Joose.Class with a regular JS constructor
+ */
+/** ignore */ // Do not display the Bootstrap classes in the docs
 Joose.MetaClassBootstrap = function () {
 	this._name			  = "Joose.MetaClassBootstrap";
 	this.methodNames	  =	[];
@@ -145,16 +161,38 @@ Joose.MetaClassBootstrap = function () {
 	this.parentClasses	  = [];
 	this.roles            = [];
 }
+/** @ignore */
 Joose.MetaClassBootstrap.prototype = {
 	
+	/**
+	 * Returns the name of the class
+	 * @name className
+	 * @function
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	className: function () {
 		return this._name
 	},
 	
+	/**
+	 * Returns the name of the class (alias to className())
+	 * @name getName
+	 * @function
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	getName: function () {
 		return this.className()
 	},
 	
+	/**
+	 * Creates a new empty meta class object
+	 * @function
+	 * @name newMetaClass
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	newMetaClass: function () {
 		
 		var me  = this;
@@ -171,15 +209,24 @@ Joose.MetaClassBootstrap.prototype = {
 		return c
 	},
 	
-	createClass:	function (name, optionalClassObject, optionalModuleObject) {
+	/**
+	 * Creates a new class object
+	 * @function
+	 * @name createClass
+	 * @param {function} optionalConstructor If provided will be used as the class constructor (You should not need this)
+	 * @param {Joose.Module} optionalModuleObject If provided the Module's name will be prepended to the class name 
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
+	createClass:	function (name, optionalConstructor, optionalModuleObject) {
 		
 		var meta  = this.newMetaClass();
 		meta.meta = this;
 		
 		var c;
 		
-		if(optionalClassObject) {
-			c = optionalClassObject
+		if(optionalConstructor) {
+			c = optionalConstructor
 		} else {
 			c = this.defaultClassFunctionBody()
 			
@@ -210,11 +257,21 @@ Joose.MetaClassBootstrap.prototype = {
 			joose.globalObjects.push(c)
 		}
 		
-		meta.addInitializer()
-		meta.addToString()
+		meta.addInitializer();
+		meta.addToString();
+		meta.addDetacher();
 		return c;
 	},
 	
+	/**
+	 * Returns the default constructor function for new classes. You might want to override this in derived meta classes
+	 * Default calls initialize on a new object upon construction.
+	 * The class object will stringify to it's name
+	 * @function
+	 * @name defaultClassFunctionBody
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	defaultClassFunctionBody: function () {
 		var f = function () {
 			this.initialize.apply(this, arguments);
@@ -225,18 +282,39 @@ Joose.MetaClassBootstrap.prototype = {
 		return f;
 	},
 	
+	/**
+	 * Adds a toString method to a class
+	 * @function
+	 * @name addToString
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	addToString: function () {
 		this.addMethod("toString", function () {
 			return "a "+ this.meta.className()
 		})
 	},
 	
+	/**
+	 * Adds the method returned by the initializer method to the class
+	 * @function
+	 * @name addInitializer
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	addInitializer: function () {
 		if(!this.c.prototype.initialize) {
 			this.addMethod("initialize", this.initializer())
 		}
 	},
 	
+	/**
+	 * Adds a toString method to a class
+	 * @function
+	 * @name initializer
+	 * @memberof Joose.Class
+	 */
+	/** @ignore */
 	initializer: function () {
 		return function (paras) {
 			if(paras) {
@@ -251,7 +329,14 @@ Joose.MetaClassBootstrap.prototype = {
 		}
 	},
 	
+	dieIfString: function (thing) {
+		if(Joose.S.isString(thing)) {
+			throw new TypeError("Parameter must not be a string.")
+		}
+	},
+	
 	addRole: function (roleClass) {
+		this.dieIfString(roleClass);
 		this.roles.push(roleClass);
 		roleClass.meta.apply(this.getClassObject())
 	},
@@ -303,6 +388,7 @@ Joose.MetaClassBootstrap.prototype = {
 	},
 	
 	addSuperClass:	function (classObject) {
+		this.dieIfString(classObject);
 		var me    = this;
 		
 		this._fixMetaclassIncompatability(classObject)
@@ -342,6 +428,7 @@ Joose.MetaClassBootstrap.prototype = {
 	},
 	
 	isa:			function (classObject) {
+		this.dieIfString(classObject);
 		var name = classObject.meta.className()
 		// Same type
 		if(this.className() == name) {
@@ -452,6 +539,31 @@ Joose.MetaClassBootstrap.prototype = {
 	
 	getMethodNames:	function () {
 		return this.methodNames;
+	},
+	
+	addDetacher: function () {
+		this.addMethod("detach", function () {
+			var meta = this.meta;
+			var c    = meta.createClass(meta.className()+"__anon__"+joose.anonymouseClassCounter++);
+			c.meta.addSuperClass(meta.getClassObject());
+			// appy the role to the anonymous class
+			// swap meta class of object with new instance
+			this.meta      = c.meta;
+			// swap __proto__ chain of object to its new class
+			// unfortunately this is not available in IE :(
+			// object.__proto__ = c.prototype
+			// Workaround for IE:
+			/*for(var i in c.prototype) {
+				if(object[i] == null) {
+					object[i] = c.prototype[i]
+				}
+			}
+			*/
+			this.constructor = c;
+			if(this.__proto__) {
+				this.__proto__ = c.prototype					
+			}
+		})
 	}
 };
 
@@ -514,9 +626,27 @@ Joose.Attribute.prototype = {
 		var name  = this.getName();
 		var props = this.getProps();
 		
-		meta.addMethod("get"+Joose.S.uppercaseFirst(this.toPublicName()), function () {
+		var func  = function () {
 			return this[name]
-		});
+		}
+		
+		var init  = props.init;
+		
+		if(props.lazy) {
+			func = function () {
+				var val = this[name];
+				if(typeof val == "function" && val === init) {
+					this[name] = val()
+				}
+				return this[name]
+			}
+		}
+		
+		meta.addMethod(this.getterName(), func);
+	},
+	
+	getterName: function () {
+		return "get"+Joose.S.uppercaseFirst(this.toPublicName())
 	},
 	
 	isPrivate: function () {

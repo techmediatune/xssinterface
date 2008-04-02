@@ -1,4 +1,4 @@
-plan(12)
+plan(14)
 
 
 Class("Wheel", {
@@ -18,6 +18,12 @@ Class("Car", {
 			isa: Wheel, 
 			is: rw,
 			handles: "*"
+		},
+		driver: {
+			init:      function () { return "Joose" },
+			lazy:	   true,
+			is:        rw,
+			predicate: "hasDriver"
 		}
 	}
 })
@@ -41,6 +47,9 @@ car.drive()
 ok(car.leftRearWheel.state == "running", "drive method is correctly forwarded")
 car.stop()
 ok(car.leftRearWheel.state == "stopped", "stop method is correctly forwarded")
+
+ok(car.getDriver, "We could get a driver");
+ok(car.getDriver() == "Joose", "Lazy attributes work")
 
 
 endTests()

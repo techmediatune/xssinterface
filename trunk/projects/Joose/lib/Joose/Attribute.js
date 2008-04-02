@@ -1,7 +1,8 @@
 Class("Joose.Attribute", {
 	after: {
 		handleProps: function (classObject) {
-			this.handleHandles(classObject)
+			this.handleHandles(classObject);
+			this.handlePredicate(classObject);
 		}
 	},
 	methods: {
@@ -24,6 +25,23 @@ Class("Joose.Attribute", {
 					throw "Unsupported value for handles: "+handles
 				}
 				
+			}
+		},
+		
+		handlePredicate: function (classObject) {
+			var meta  = classObject.meta;
+			var name  = this.getName();
+			var props = this.getProps();
+			
+			var predicate = props.predicate;
+			
+			var getter    = this.getterName()
+			
+			if(predicate) {
+				meta.addMethod(predicate, function () {
+					var val = this[getter]();
+					return val ? true : false
+				})
 			}
 		}
 	}

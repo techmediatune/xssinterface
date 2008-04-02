@@ -1,4 +1,4 @@
-plan(21)
+plan(22)
 
 diag("Inheritance");
 
@@ -31,6 +31,8 @@ ok(s.one() == 1, "Subclass's objects can call methods from TestClass")
 	
 ok(s.meta.isa(TestClass), "isa knows about our parent")
 ok(!s.meta.isa(TestClass2), "TestClass2 is not out parent")
+
+fail(function () { s.meta.isa("TestClass") }, "Parameter must not be a string.", "isa takes an object parameter")
 
 
 Class("SuperClass", {

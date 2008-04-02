@@ -39,22 +39,9 @@ Class("Joose.Role", {
 			
 			if(joose.isInstance(object)) {
 				// Create an anonymous subclass ob object's class
-				var meta = object.meta;
-				var c    = meta.createClass(meta.className()+"__"+this.className()+"__"+Joose.Role.anonymousClassCounter);
-				c.meta.addSuperClass(object.meta.getClassObject());
-				// appy the role to the anonymous class
-				c.meta.addRole(this.getClassObject())
-				// swap meta class of object with new instance
-				object.meta      = c.meta;
-				// swap __proto__ chain of object to its new class
-				// unfortunately this is not available in IE :(
-				// object.__proto__ = c.prototype
-				// Workaround for IE:
-				for(var i in c.prototype) {
-					if(object[i] == null) {
-						object[i] = c.prototype[i]
-					}
-				}
+				
+				object.detach();
+				object.meta.addRole(this.getClassObject());
 			} else {
 				// object is actually a class
 				var me    = this;
