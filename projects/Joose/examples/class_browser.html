@@ -1,0 +1,87 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Joose Class Browser</title>
+
+<script type="text/javascript" src="../lib/Joose.js"></script>
+<script type="text/javascript">
+joose.loadComponents("../lib")
+
+function $(id) {
+	return document.getElementById(id)
+}
+
+
+
+</script>
+<script type="text/javascript">
+
+Module("com.test.me", function () {
+	Class("TestClass", {
+		isa: Joose.Method,
+		does: Joose.Decorator,
+		methods: {
+			hello: function () { return "world" }
+		},
+		classMethods: {
+			foo: function () { alert("bar") }
+		}
+	})
+})
+
+</script>
+<script type="text/javascript" src="../lib/JooseX/IDE/ClassBrowser.js"></script>
+<script type="text/javascript" src="../tests/json2.js"></script>
+<link href="test.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+
+<body>
+
+<div id="JooseCB">
+  <style type="text/css">
+  #JooseCB {
+  	font-family: Arial;
+  }
+  #JooseCB th {
+  	text-align: left;
+  	width: 25%;
+  	background-color: #99ccff;
+  }
+  
+  #JooseCB select {
+  	min-width: 100%
+  }
+  
+  #JooseCB td {
+  	background-color: #99ccff;
+  }
+  #JooseCBContainerTable {
+  	width: 100%;
+  }
+  </style>
+  <table id="JooseCBContainerTable" cellpadding=5 cellspacing=1>
+    <tr>
+      <th>Modules</th>
+      <th>Classes and Roles</th>
+      <th>Categories</th>
+      <th>Elements</th>
+    </tr>
+    <tr>
+      <td><select id="JooseCBModulesSelect" size=10     onchange="cb.selectedModule(this)"></select>
+      <td><select id="JooseCBClassesSelect" size=10     onchange="cb.selectedClass(this)"></select>
+      <td><select id="JooseCBCategoriesSelect" size=10  onchange="cb.selectedCategory(this)"></select>
+      <td><select id="JooseCBElementsSelect" size=10    onchange="cb.selectedElement(this)"></select>
+    </tr>
+    <tr>
+      <td id="JooseCBBody" colspan="4"></td>
+    </tr>
+  </table>
+</div>
+<script type="text/javascript">
+window.cb = new JooseX.IDE.ClassBrowser()
+</script>
+
+</body>
+</html>
