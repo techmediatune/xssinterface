@@ -1,4 +1,5 @@
 Tests
+- complete 01_util.js
 - Add many more tests
 - Add tests that include and use frameworks such as prototype.js, dojo or jquery.
 - refactor tests into sub directories
@@ -7,9 +8,10 @@ Documentation
 - All
 
 Features
+- implement object.detach to detach an object from its class
+- requires needs to accept an optional array
+- does needs to accept an optional array
 - implement class versioning
-- autodetect and use equivalents of methods in EvilObjectExtension.js of frameworks such as prototype.js, dojo and jquery.
-- Add something to register Namespaces
 - Make all builders accept strings instead of class objects, too, so you dont have to remember what to pass
 
 Refactoring:

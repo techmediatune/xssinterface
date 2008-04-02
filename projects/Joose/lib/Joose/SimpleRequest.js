@@ -1,5 +1,10 @@
-// Low-Level HTTP Request
+/**
+ * Class to perform simple synchronous AJAX Requests used for component loading.
+ * @name Joose.SimpleRequest
+ * @class
+ */
 Class("Joose.SimpleRequest", {
+
 	has: {_req: {}},
 	methods: {
 		initialize: function () {
@@ -9,6 +14,13 @@ Class("Joose.SimpleRequest", {
         		this._req = new ActiveXObject("Microsoft.XMLHTTP");
     		}
 		},
+		/**
+		 * Fetches text from an URL
+		 * @name getText
+		 * @param {string} url The URL
+		 * @function
+		 * @memberof Joose.SimpleRequest
+		 */
 		getText: function (url) {
         	this._req.open("GET", url, false);
         	try {

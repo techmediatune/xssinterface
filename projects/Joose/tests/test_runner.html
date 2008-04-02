@@ -25,7 +25,7 @@ var parts = query.split("?");
 
 var testUrl = unescape(parts[1]);
 
-if(testUrl.indexOf("/") != -1) {
+if(testUrl.indexOf(":") != -1) {
 	throw "illegal testUrl: "+testUrl
 }
 

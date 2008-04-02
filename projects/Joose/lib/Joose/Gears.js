@@ -1,4 +1,9 @@
-/* A meta class to for gears workers */
+/**
+ * Joose.Gears is a meta class for classes that want to delegate work to gears workers
+ * @name Joose.Gears
+ * @extends Joose.Class
+ * @constructor
+ */
 Class("Joose.Gears", {
 	isa: Joose.Class,
 	has: {
@@ -18,7 +23,6 @@ Class("Joose.Gears", {
 				}
 			}
 		},
-		
 		handleGearsMessage: function (message) {
 			var paras  = JSON.parse(message.text);
 			var cbName = paras.to;
@@ -32,6 +36,15 @@ Class("Joose.Gears", {
 			return window.google && window.google.gears && window.google.gears.factory
 		},
 		
+		/**
+		 * Adds a worker to the class
+		 * @function
+		 * @name addWorker
+		 * @param {string} Name of the worker
+		 * @param {function} Function body of the worker
+		 * @param {props} Optional properties for the created method (ignored)
+		 * @memberof Joose.Gears
+		 */	
 		addWorker:		 function (name, func, props) {
 			
 			var cbName  = "on"+Joose.S.uppercaseFirst(name)

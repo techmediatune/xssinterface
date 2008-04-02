@@ -1,11 +1,10 @@
-plan(13)
+plan(12)
 diag("Sanity")
 ok(Joose,   "Joose is here");
-ok(Joose.Builders,   "We have a builder");
+ok(Joose.Builder,   "We have a builder");
 ok(joose,  "joose is here");
 ok(joose.init, "joose has an init method :)")
 
-ok(Joose.Builders, "Builders are here");
 ok(Joose.Class, "Joose.Class is here")
 ok(Joose.Role, "Joose.Role is here")
 // TODO test for all components
