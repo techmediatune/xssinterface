@@ -162,6 +162,7 @@ XSSInterface.Listener.prototype = {
 	
 		if(this.canPostMessage()) {
 			document.addEventListener("message", this.makePostMessageHandler(), false)
+			window.addEventListener("message", this.makePostMessageHandler(), false)
 		} 
 		else if(this.canGearsMessage()) {
 			var workerPool       = google.gears.factory.create('beta.workerpool');
