@@ -12,8 +12,6 @@ wp.onmessage = function(a, b, message) {
 	var origin = new String(message.origin);
 	var parts  = origin.split("/");
 	var domain = parts[2];
-	parts      = domain.split(":"); // remove port
-	domain     = parts[0];
 	
 	var recipient = domain;
 	var channelId = message.text;
