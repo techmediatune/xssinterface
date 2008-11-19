@@ -285,8 +285,6 @@ XSSInterface.Listener.prototype = {
 		var uri_string = new String(uri);
 		var parts      = uri_string.split("/");
 		var domain     = parts[2];
-		parts          = domain.split(":"); // remove port
-		domain         = parts[0];
 		return domain
 	},
 	
@@ -475,7 +473,7 @@ XSSInterface.Caller.prototype = {
 		var data = {
 			name:  name,
 			paras: args,
-			from:  document.location.hostname
+			from:  document.location.host
 		};
 		
 		
@@ -678,7 +676,7 @@ XSSInterface.Cookie.prototype = {
 	 */
 	setCrossDomain: function (url, key, value,channelId) { // key may have the values data or token
 	
-		var from = this.doc.location.hostname;
+		var from = this.doc.location.host;
 		
 		var src = "" + url + '?from='+escape(from)+'&'+key+'='+escape(value)+'&channelId='+escape(channelId)
 		
@@ -686,7 +684,7 @@ XSSInterface.Cookie.prototype = {
 		
 		//if(!this.iframeContainer) {
 			var span   = this.doc.createElement("span");
-			this.doc.body.appendChild(span);
+			this.doc.getElementsByTagName('body').item(0).appendChild(span);
 			this.iframeContainer = span
 		//}
 		
@@ -868,4 +866,3 @@ function XSSInterfaceInitializeGears() {
     google.gears = {factory: factory};
   }
 }
-
