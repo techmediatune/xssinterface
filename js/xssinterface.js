@@ -46,6 +46,9 @@ var XSSInterfaceEnableGoogleGearsSupport  = true;
 // Only disable this for debugging
 var XSSInterfaceEnablePostMessageSupport  = true;
 
+// Only disable this for debugging
+var XSSInterfaceEnableSameDomainSupport  = true;
+
 // Number of milli seconds between polls for new callbacks
 var XSSInterfacePollIntervalMilliSeconds  = 200;
 // Name of cookie that is used for messages. Should not be changed
@@ -77,8 +80,24 @@ XSSInterface = {
 			return true
 		}
 		return false
-	}
-	
+	},
+
+	canSameDomainMessage:	function () {
+		if(!XSSInterfaceEnableSameDomainSupport) {
+			return false
+		}
+		if(this.domain){
+			return window.location.host == this.domain;
+		}
+		if(this.allowedDomains && this.allowedDomains.length>0){
+			var ok = true;
+			for(var i = 0; i < this.allowedDomains.length; i++) {
+				ok &= (this.allowedDomains[i] == window.location.host);
+			}
+			return ok;
+		}
+		return false;
+	}	
 }
 
 /* A listener for cross domain callbacks
@@ -131,7 +150,7 @@ XSSInterface.Listener.prototype = {
 		
 		this.allowedDomains.push(hostname);
 		
-		if(this.canPostMessage())  return;
+		if(this.canPostMessage() || this.canSameDomainMessage())  return;
 		if(this.canGearsMessage()) {
 			this.gearsListenerPath[hostname] = pathToGearsListenerFile
 		};
@@ -163,7 +182,9 @@ XSSInterface.Listener.prototype = {
 		if(this.canPostMessage()) {
 			document.addEventListener("message", this.makePostMessageHandler(), false)
 			window.addEventListener("message", this.makePostMessageHandler(), false)
-		} 
+		}else if(this.canSameDomainMessage()) {
+			window.xssPostMessage = this.makePostMessageHandler();
+		}
 		else if(this.canGearsMessage()) {
 			var workerPool       = google.gears.factory.create('beta.workerpool');
 			workerPool.onmessage = this.makeGearsMessageHandler();
@@ -192,6 +213,7 @@ XSSInterface.Listener.prototype = {
 	 */
 	canPostMessage:	 XSSInterface.canPostMessage,
 	canGearsMessage: XSSInterface.canGearsMessage,
+	canSameDomainMessage: XSSInterface.canSameDomainMessage,
 	
 	// private
 	/*
@@ -449,7 +471,7 @@ XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channe
 		this.channelId = ""
 	}
 	
-	if(!this.canPostMessage() && !this.canGearsMessage()) {
+	if(!this.canPostMessage() && !this.canSameDomainMessage() && !this.canGearsMessage()) {
 		var me = this;
 		setInterval(function () { me.callByCookie() }, XSSInterfacePollIntervalMilliSeconds * 20)
 	}
@@ -487,8 +509,7 @@ XSSInterface.Caller.prototype = {
     save: function(data) {
     
     	
-    
-    	if(this.canPostMessage()) {
+    	if(this.canPostMessage() || this.canSameDomainMessage()) {
     		var message = this.serialize(data);
     		this.postMessage(this.win, message)
     	} 
@@ -556,9 +577,10 @@ XSSInterface.Caller.prototype = {
 		
 		if(window.postMessage) { // HTML 5 Standard
 			return win.postMessage(message, targetOrigin)
-		}
-		if(window.document && window.document.postMessage) { // Opera 9
+		}else if(window.document && window.document.postMessage) { // Opera 9
 			return win.document.postMessage(message, targetOrigin)
+		}else if(win.xssPostMessage){
+			return win.xssPostMessage({"data":message, "origin":targetOrigin});
 		}
 	},
 	/*
@@ -588,7 +610,7 @@ XSSInterface.Caller.prototype = {
 	 */
 	securityTokenToTargetDomain: function () {
 	
-		if(this.canPostMessage()) {
+		if(this.canPostMessage() || this.canSameDomainMessage()) {
 			return "postMessage"
 		}
 	
@@ -597,8 +619,8 @@ XSSInterface.Caller.prototype = {
 	},
 	
 	canPostMessage:	 XSSInterface.canPostMessage,
-	canGearsMessage: XSSInterface.canGearsMessage
-
+	canGearsMessage: XSSInterface.canGearsMessage,
+	canSameDomainMessage: XSSInterface.canSameDomainMessage
 };
 
 
