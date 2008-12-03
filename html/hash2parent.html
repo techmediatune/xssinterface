@@ -1,0 +1,13 @@
+<html>
+<head>
+<title>Hash 2 parent</title>
+
+<script type="text/javascript">
+if(window.location.hash.indexOf("#")==0){
+	parent[window.location.hash.substring(1)].XSSInterfaceHashCallback(window);
+}
+</script>
+
+</head>
+<body></body>
+</html>
