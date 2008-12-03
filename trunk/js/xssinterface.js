@@ -49,6 +49,8 @@ var XSSInterfaceEnablePostMessageSupport  = true;
 // Only disable this for debugging
 var XSSInterfaceEnableSameDomainSupport  = true;
 
+var XSSInterfaceEnableHashMessageSupport = false;
+
 // Number of milli seconds between polls for new callbacks
 var XSSInterfacePollIntervalMilliSeconds  = 200;
 // Name of cookie that is used for messages. Should not be changed
@@ -59,6 +61,18 @@ var XSSInterfaceSecurityTokenCookieName   = "XSSSecurityToken";
 var XSSInterfaceDebug                     = false;
 
 var XSSMaximumQueryStringLength           = document.all ? 2000 : 6000;
+
+var XSSInterfaceHashMap = new Array();
+
+function XSSInterfaceHashCallback(win){
+	var query  = new XSSInterface.Query(win);
+	var channelId = query.param("channelId");
+	var value = query.param("value");
+	if(channelId && value){
+		var listener = XSSInterfaceHashMap[channelId];
+		listener.handleHashMessage(value);
+	}
+}
 
 XSSInterface = {
 	canPostMessage:	function () {
@@ -97,7 +111,11 @@ XSSInterface = {
 			return ok;
 		}
 		return false;
-	}	
+	},
+	
+	canHashMessage: function () {
+		return XSSInterfaceEnableHashMessageSupport;
+	}
 }
 
 /* A listener for cross domain callbacks
@@ -134,6 +152,10 @@ XSSInterface.Listener   = function (securityToken,channelId) {
 	this.methodNotFoundCallback = null;
 	// When defined called with (methodName,callerDomain,securityToken) when an unauthorized message is called
 	this.blockedMessageCallback = null;
+	
+	if(this.canHashMessage()){
+		XSSInterfaceHashMap[channelId] = this;
+	}
 }
 
 XSSInterface.Listener.prototype = {
@@ -150,7 +172,7 @@ XSSInterface.Listener.prototype = {
 		
 		this.allowedDomains.push(hostname);
 		
-		if(this.canPostMessage() || this.canSameDomainMessage())  return;
+		if(this.canPostMessage() || this.canSameDomainMessage() || this.canHashMessage())  return;
 		if(this.canGearsMessage()) {
 			this.gearsListenerPath[hostname] = pathToGearsListenerFile
 		};
@@ -202,8 +224,10 @@ XSSInterface.Listener.prototype = {
 				this.gearsWorkerPools[i] = workerPool
 			}
 		}
+		else if(this.canHashMessage()){
+		}
 		else {
-			this.timer = window.setInterval( function () { me.handleCookieMessage() }, XSSInterfacePollIntervalMilliSeconds )
+			this.timer = window.setInterval( function () { me.handleCookieMessage() }, XSSInterfacePollIntervalMilliSeconds );
 		}
 	},	
 	
@@ -214,6 +238,7 @@ XSSInterface.Listener.prototype = {
 	canPostMessage:	 XSSInterface.canPostMessage,
 	canGearsMessage: XSSInterface.canGearsMessage,
 	canSameDomainMessage: XSSInterface.canSameDomainMessage,
+	canHashMessage:   XSSInterface.canHashMessage,
 	
 	// private
 	/*
@@ -350,6 +375,11 @@ XSSInterface.Listener.prototype = {
 		this.execute(data, true)
 		
 	},
+	
+	handleHashMessage: function (value) {
+		var data   = this.parse(value);
+		this.execute(data, true)
+	},
 
 	// private
 	/*
@@ -451,7 +481,7 @@ XSSInterface.Listener.prototype = {
  * @param channelId is an identifier that groups listeners and callers. If you have multiple iframes, create one channel for each of them.
  * @param win is the window or iframe to which calls are performed
  */
-XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channelId, win) {
+XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channelId, win, pathToHash2parentFile) {
 	this.domain                     = targetDomain;
 	this.pathToCookieSetterHTMLFile = pathToCookieSetterHTMLFile
 	
@@ -471,7 +501,18 @@ XSSInterface.Caller = function (targetDomain, pathToCookieSetterHTMLFile, channe
 		this.channelId = ""
 	}
 	
-	if(!this.canPostMessage() && !this.canSameDomainMessage() && !this.canGearsMessage()) {
+	if(this.canHashMessage()){
+		this.pathToHash2parentFile = pathToHash2parentFile;
+		
+		this.iframeContainer = document.createElement("iframe");
+		this.iframeContainer.setAttribute("src", "http://" + this.domain + pathToHash2parentFile);
+		this.iframeContainer.setAttribute("width", "1");
+		this.iframeContainer.setAttribute("height", "1");
+		this.iframeContainer.setAttribute("border", "0");
+		this.iframeContainer.setAttribute("frameborder", "0");
+		
+		document.getElementsByTagName('body').item(0).appendChild(this.iframeContainer);		
+	}else if(!this.canPostMessage() && !this.canSameDomainMessage() && !this.canGearsMessage()) {
 		var me = this;
 		setInterval(function () { me.callByCookie() }, XSSInterfacePollIntervalMilliSeconds * 20)
 	}
@@ -516,6 +557,10 @@ XSSInterface.Caller.prototype = {
     	else if(this.canGearsMessage()) {
     		var message = this.serialize(data);
     		this.sendGearsMessage(message)
+    	}
+    	else if(this.canHashMessage()) {
+    		var message = this.serialize(data);
+    		this.sendHashMessage(message)
     	}
     	else {
     		this.scheduledCalls.push(data);
@@ -565,6 +610,12 @@ XSSInterface.Caller.prototype = {
 			var url     = 'http://'+this.domain+this.pathToCookieSetterHTMLFile
 			this.cookie.setCrossDomain(url, "data", message, this.channelId)
 		}
+	},
+	
+	sendHashMessage: function (message) {
+		var iframeName = (this.win==parent)?"parent":this.channelId;
+		var src = "http://" + this.domain + this.pathToHash2parentFile + '?channelId='+escape(this.channelId)+"&value="+escape(message)+"&"+(new Date().getMilliseconds())+"#"+iframeName;
+		this.iframeContainer.setAttribute("src",src);
 	},
 	
 	// private
@@ -620,7 +671,8 @@ XSSInterface.Caller.prototype = {
 	
 	canPostMessage:	 XSSInterface.canPostMessage,
 	canGearsMessage: XSSInterface.canGearsMessage,
-	canSameDomainMessage: XSSInterface.canSameDomainMessage
+	canSameDomainMessage: XSSInterface.canSameDomainMessage,
+	canHashMessage: XSSInterface.canHashMessage
 };
 
 
@@ -715,8 +767,9 @@ XSSInterface.Cookie.prototype = {
 
 }
 
-XSSInterface.Query = function () {
-	this.queryString = window.location.search;
+XSSInterface.Query = function (win) {
+	var cur_win = (win)?win:window;
+	this.queryString = cur_win.location.search;
 	this.query       = this.parse();
 }
 
