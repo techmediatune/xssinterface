@@ -40,7 +40,7 @@
  */
 
 // Only disable this for debugging
-var XSSInterfaceEnablePostMessageSupport	= true;
+var XSSInterfaceEnablePostMessageSupport	= false;
 
 // Only disable this for debugging
 var XSSInterfaceEnableSameDomainSupport	= true;
@@ -284,21 +284,8 @@ XSSInterface.Caller = function (targetDomain, pathToHash2parentFile, channelId, 
 	
 	this.domain = ((targetDomain.indexOf("://")==-1)?"http://":"")+targetDomain;
 	this.win = win ? win : window.frames[channelId]
-	
 	this.channelId  = channelId ? channelId : "";
-	
-	if(this.canHashMessage()){
-		this.pathToHash2parentFile = pathToHash2parentFile;
-		
-		this.iframeContainer = document.createElement("iframe");
-		this.iframeContainer.setAttribute("src", this.domain + pathToHash2parentFile);
-		this.iframeContainer.setAttribute("width", "1");
-		this.iframeContainer.setAttribute("height", "1");
-		this.iframeContainer.setAttribute("border", "0");
-		this.iframeContainer.setAttribute("frameborder", "0");
-		
-		document.getElementsByTagName('body').item(0).appendChild(this.iframeContainer);		
-	}
+	this.pathToHash2parentFile = pathToHash2parentFile;
 }
 
 XSSInterface.Caller.prototype = {
@@ -343,6 +330,17 @@ XSSInterface.Caller.prototype = {
 	
 	sendHashMessage: function (win, message) {
 		XSSdebug("sendHashMessage "+message);
+		
+		if(!this.iframeContainer || !this.iframeContainer.parentNode){
+			this.iframeContainer = document.createElement("iframe");
+			this.iframeContainer.setAttribute("width", "1");
+			this.iframeContainer.setAttribute("height", "1");
+			this.iframeContainer.setAttribute("border", "0");
+			this.iframeContainer.setAttribute("frameborder", "0");
+		
+			document.getElementsByTagName('body').item(0).appendChild(this.iframeContainer);
+		}
+		
 		var iframeName = (win==parent)?"parent":this.channelId;
 		var src = this.domain + this.pathToHash2parentFile + '?id='+escape(this.channelId)+"&data="+escape(message)+"&"+(new Date().getMilliseconds())+"#"+iframeName;
 		this.iframeContainer.setAttribute("src",src);
