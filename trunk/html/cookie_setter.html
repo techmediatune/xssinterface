@@ -1,12 +1,13 @@
 <html>
 <head>
-<title>Cookie Setter</title>
-
-<script type="text/javascript" src="/xssinterface/js/json2.js"></script>
-<script type="text/javascript" src="/xssinterface/js/xssinterface.js"></script>
+<title>Hash 2 parent</title>
 
 <script type="text/javascript">
-XSSInterface.Cookie.setFromLocation()
+if(window.location.hash.indexOf("#")==0){
+	var id = window.location.hash.substring(1);
+	if(parent[id] && parent[id].XSSInterfaceCallback)
+		parent[id].XSSInterfaceCallback(window);
+}
 </script>
 
 </head>

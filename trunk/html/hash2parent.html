@@ -4,7 +4,9 @@
 
 <script type="text/javascript">
 if(window.location.hash.indexOf("#")==0){
-	parent[window.location.hash.substring(1)].XSSInterfaceHashCallback(window);
+	var id = window.location.hash.substring(1);
+	if(parent[id] && parent[id].XSSInterfaceCallback)
+		parent[id].XSSInterfaceCallback(window);
 }
 </script>
 
